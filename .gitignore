@@ -1,0 +1,136 @@
+# =============================================================================
+# FLUTTER / DART
+# =============================================================================
+*.dart_tool/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.gen.dart
+
+# iOS
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Android
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/key.properties
+mobile/android/app/google-services.json
+mobile/android/captures/
+mobile/android/.idea/
+
+# =============================================================================
+# PYTHON / FASTAPI
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Virtual environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribution / packaging
+dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+*.whl
+MANIFEST
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# mypy / pyright / ruff
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.ruff_cache/
+
+# =============================================================================
+# ENVIRONMENT & SECRETS
+# =============================================================================
+*.env
+*.env.*
+!*.env.example
+.envrc
+secrets/
+*.pem
+*.key
+*.cert
+*.p12
+google-services.json
+GoogleService-Info.plist
+
+# =============================================================================
+# IDE / EDITORS
+# =============================================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains (Android Studio, IntelliJ, PyCharm)
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+
+# =============================================================================
+# OS
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =============================================================================
+# MISC
+# =============================================================================
+*.log
+*.bak
+*.swp
+*.tmp
+*.orig
+.cache/
