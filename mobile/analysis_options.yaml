@@ -11,9 +11,21 @@ plugins:
 
       dispose_provided_instances: false
 
-
 analyzer:
   errors:
     missing_return: error
     dead_code: warning
   exclude:
+    - "**/*.g.dart"        
+    - "**/*.freezed.dart"  
+    - "lib/generated/**"  
+
+lints:
+  rules:
+    - always_use_package_imports
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_locals
+    - sized_box_for_whitespace
+    - use_super_parameters
