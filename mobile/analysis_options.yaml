@@ -11,6 +11,8 @@ plugins:
 
       dispose_provided_instances: false
 
+      prefer_overriding_parent_equality: false
+
 analyzer:
   errors:
     missing_return: error
