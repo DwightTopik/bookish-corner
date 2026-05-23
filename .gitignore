@@ -1,4 +1,13 @@
 # =============================================================================
+# AI ASSISTANT FILES
+# =============================================================================
+CLAUDE.md
+.claude/
+.cursor/
+.cursorignore
+.cursorindexingignore
+
+# =============================================================================
 # FLUTTER / DART
 # =============================================================================
 *.dart_tool/
@@ -15,8 +24,7 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/.packages
 
-# Generated files
-*.g.dart
+# Generated files (*.g.dart is intentionally NOT ignored — commit generated code)
 *.freezed.dart
 *.mocks.dart
 *.gen.dart
@@ -33,6 +41,7 @@ mobile/android/.gradle/
 mobile/android/local.properties
 mobile/android/key.properties
 mobile/android/app/google-services.json
+*.jks
 mobile/android/captures/
 mobile/android/.idea/
 
@@ -47,6 +56,7 @@ __pycache__/
 
 # Virtual environments
 .env
+.env.local
 .venv/
 env/
 venv/
@@ -87,6 +97,7 @@ dmypy.json
 .envrc
 secrets/
 *.pem
+*.p8
 *.key
 *.cert
 *.p12

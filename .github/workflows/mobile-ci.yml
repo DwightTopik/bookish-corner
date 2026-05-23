@@ -1,0 +1,44 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['mobile/**']
+  pull_request:
+    branches: [main, develop]
+    paths: ['mobile/**']
+
+jobs:
+  flutter-analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: cd mobile && flutter pub get
+
+      - name: Analyze
+        run: cd mobile && flutter analyze --fatal-infos
+
+  flutter-test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: cd mobile && flutter pub get
+
+      - name: Test
+        run: cd mobile && flutter test
