@@ -35,6 +35,8 @@ mobile/ios/.symlinks/
 mobile/ios/Flutter/Flutter.framework
 mobile/ios/Flutter/Flutter.podspec
 mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+# iOS code signing — provisioning profiles (App Store / TestFlight)
+*.mobileprovision
 
 # Android
 mobile/android/.gradle/
@@ -42,8 +44,19 @@ mobile/android/local.properties
 mobile/android/key.properties
 mobile/android/app/google-services.json
 *.jks
+*.keystore
 mobile/android/captures/
 mobile/android/.idea/
+
+# Firebase artifacts (when/if integrated)
+firebase-debug.log
+.firebase/
+
+# Fastlane (when/if adopted)
+fastlane/.env
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
 
 # =============================================================================
 # PYTHON / FASTAPI

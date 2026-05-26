@@ -1,5 +1,5 @@
 name: mobile
-description: "A new Flutter project."
+description: "Bookish Corner mobile application"
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -25,6 +25,15 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   drift_dev: ^2.20.0
   build_runner: ^2.4.0
+  flutter_launcher_icons: ^0.14.0
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#08111D"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
