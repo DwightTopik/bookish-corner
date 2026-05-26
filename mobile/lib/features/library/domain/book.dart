@@ -1,5 +1,5 @@
-import 'package:mobile/features/library/domain/book_format.dart';
-import 'package:mobile/features/library/domain/reading_status.dart';
+import 'package:bookish_corner/features/library/domain/book_format.dart';
+import 'package:bookish_corner/features/library/domain/reading_status.dart';
 
 class Book {
   const Book({

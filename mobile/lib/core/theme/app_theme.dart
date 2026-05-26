@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/core/theme/app_colors.dart';
+import 'package:bookish_corner/core/theme/app_colors.dart';
 
 ThemeData buildLightTheme() {
   final base = ColorScheme.fromSeed(

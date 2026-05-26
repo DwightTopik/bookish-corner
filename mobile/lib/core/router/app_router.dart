@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile/app/scaffold_with_nav.dart';
-import 'package:mobile/features/auth/presentation/screens/auth_screen.dart';
-import 'package:mobile/features/library/presentation/screens/add_book_screen.dart';
-import 'package:mobile/features/library/presentation/screens/library_screen.dart';
-import 'package:mobile/features/library/presentation/screens/search_screen.dart';
-import 'package:mobile/features/player/presentation/screens/player_screen.dart';
-import 'package:mobile/features/reader/presentation/screens/reader_screen.dart';
-import 'package:mobile/features/settings/presentation/screens/settings_screen.dart';
-import 'package:mobile/features/tracker/presentation/screens/tracker_screen.dart';
+import 'package:bookish_corner/app/scaffold_with_nav.dart';
+import 'package:bookish_corner/features/auth/presentation/screens/auth_screen.dart';
+import 'package:bookish_corner/features/library/presentation/screens/add_book_screen.dart';
+import 'package:bookish_corner/features/library/presentation/screens/library_screen.dart';
+import 'package:bookish_corner/features/library/presentation/screens/search_screen.dart';
+import 'package:bookish_corner/features/player/presentation/screens/player_screen.dart';
+import 'package:bookish_corner/features/reader/presentation/screens/reader_screen.dart';
+import 'package:bookish_corner/features/settings/presentation/screens/settings_screen.dart';
+import 'package:bookish_corner/features/tracker/presentation/screens/tracker_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(

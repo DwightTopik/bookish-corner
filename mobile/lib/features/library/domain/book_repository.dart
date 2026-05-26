@@ -1,5 +1,5 @@
-import 'package:mobile/features/library/domain/book.dart';
-import 'package:mobile/features/library/domain/reading_status.dart';
+import 'package:bookish_corner/features/library/domain/book.dart';
+import 'package:bookish_corner/features/library/domain/reading_status.dart';
 
 abstract class BookRepository {
   Stream<List<Book>> watchAllBooks();

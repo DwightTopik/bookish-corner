@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile/core/di/repository_providers.dart';
-import 'package:mobile/core/theme/app_colors.dart';
-import 'package:mobile/features/library/domain/book.dart';
+import 'package:bookish_corner/core/di/repository_providers.dart';
+import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/features/library/domain/book.dart';
 
 class BookListTile extends ConsumerWidget {
   const BookListTile({super.key, required this.book});

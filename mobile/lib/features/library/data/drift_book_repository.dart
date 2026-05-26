@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
-import 'package:mobile/core/database/app_database.dart';
-import 'package:mobile/features/library/domain/book.dart';
-import 'package:mobile/features/library/domain/book_format.dart';
-import 'package:mobile/features/library/domain/book_repository.dart';
-import 'package:mobile/features/library/domain/reading_status.dart';
+import 'package:bookish_corner/core/database/app_database.dart';
+import 'package:bookish_corner/features/library/domain/book.dart';
+import 'package:bookish_corner/features/library/domain/book_format.dart';
+import 'package:bookish_corner/features/library/domain/book_repository.dart';
+import 'package:bookish_corner/features/library/domain/reading_status.dart';
 
 class DriftBookRepository implements BookRepository {
   DriftBookRepository(this._db);

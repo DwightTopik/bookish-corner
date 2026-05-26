@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile/core/theme/app_colors.dart';
-import 'package:mobile/features/library/presentation/providers/library_providers.dart';
-import 'package:mobile/features/library/presentation/widgets/book_list_tile.dart';
-import 'package:mobile/features/library/presentation/widgets/library_empty_state.dart';
+import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/features/library/presentation/providers/library_providers.dart';
+import 'package:bookish_corner/features/library/presentation/widgets/book_list_tile.dart';
+import 'package:bookish_corner/features/library/presentation/widgets/library_empty_state.dart';
 
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
