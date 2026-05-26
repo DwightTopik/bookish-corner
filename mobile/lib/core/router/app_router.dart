@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/app/scaffold_with_nav.dart';
 import 'package:mobile/features/auth/presentation/screens/auth_screen.dart';
+import 'package:mobile/features/library/presentation/screens/add_book_screen.dart';
 import 'package:mobile/features/library/presentation/screens/library_screen.dart';
 import 'package:mobile/features/library/presentation/screens/search_screen.dart';
 import 'package:mobile/features/player/presentation/screens/player_screen.dart';
@@ -55,6 +56,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth',
         builder: (context, state) => const AuthScreen(),
+      ),
+      GoRoute(
+        path: '/library/add',
+        builder: (context, state) => const AddBookScreen(),
       ),
       GoRoute(
         path: '/reader/:bookId',
