@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:bookish_corner/app/scaffold_with_nav.dart';
 import 'package:bookish_corner/features/auth/presentation/screens/auth_screen.dart';
 import 'package:bookish_corner/features/library/presentation/screens/library_screen.dart';
-import 'package:bookish_corner/features/library/presentation/screens/search_screen.dart';
 import 'package:bookish_corner/features/player/presentation/screens/player_screen.dart';
 import 'package:bookish_corner/features/reader/presentation/screens/reader_screen.dart';
 import 'package:bookish_corner/features/settings/presentation/screens/settings_screen.dart';
@@ -23,14 +22,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/library',
                 builder: (context, state) => const LibraryScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/search',
-                builder: (context, state) => const SearchScreen(),
               ),
             ],
           ),
