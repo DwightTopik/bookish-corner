@@ -7,6 +7,7 @@ import 'package:bookish_corner/core/constants/app_dimensions.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/player/presentation/providers/player_providers.dart';
+import 'package:bookish_corner/features/player/presentation/providers/player_state.dart';
 import 'package:bookish_corner/features/player/presentation/widgets/chapters_sheet.dart';
 import 'package:bookish_corner/features/player/presentation/widgets/cover_glow.dart';
 import 'package:bookish_corner/features/player/presentation/widgets/player_bottom_bar.dart';
@@ -53,11 +54,18 @@ class PlayerScreen extends ConsumerWidget {
   }
 }
 
-class _PlayerView extends ConsumerWidget {
+class _PlayerView extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PlayerView> createState() => _PlayerViewState();
+}
+
+class _PlayerViewState extends ConsumerState<_PlayerView> {
+  bool _showBookPercent = false;
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(playerProvider);
-    final AppColors(:bg, :textPrimary, :textSecondary) = context.appColors;
+    final AppColors(:bg, :textPrimary) = context.appColors;
     final book = state.book;
     String bookTitle = '';
     String bookAuthor = '';
@@ -70,7 +78,10 @@ class _PlayerView extends ConsumerWidget {
     }
     final size = MediaQuery.sizeOf(context);
     final coverSize = (size.shortestSide * AppDimensions.playerCoverRatio)
-        .clamp(220.0, 320.0);
+        .clamp(
+          AppDimensions.playerCoverMinSize,
+          AppDimensions.playerCoverMaxSize,
+        );
 
     return Scaffold(
       backgroundColor: bg,
@@ -83,12 +94,22 @@ class _PlayerView extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _PlayerHeader(bookTitle: bookTitle),
+              _PlayerHeader(bookTitle: bookTitle, bookAuthor: bookAuthor),
               const Spacer(),
               Center(
                 child: CoverGlow(coverPath: coverImagePath, size: coverSize),
               ),
-              const Gap(18),
+              const Gap(AppDimensions.playerBookProgressTopGap),
+              _BookProgressSummary(
+                state: state,
+                showPercent: _showBookPercent,
+                onTap: () {
+                  setState(() {
+                    _showBookPercent = !_showBookPercent;
+                  });
+                },
+              ),
+              const Gap(AppDimensions.playerBookProgressBottomGap),
               Text(
                 state.currentChapter?.title ?? bookTitle,
                 textAlign: TextAlign.center,
@@ -100,15 +121,7 @@ class _PlayerView extends ConsumerWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const Gap(4),
-              Text(
-                bookAuthor,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: textSecondary, fontSize: 14),
-              ),
-              const Spacer(),
+              const Spacer(flex: 2),
               PlayerProgress(
                 state: state,
                 onChanged: (position) {
@@ -160,14 +173,110 @@ class _PlayerView extends ConsumerWidget {
   }
 }
 
-class _PlayerHeader extends StatelessWidget {
-  const _PlayerHeader({required this.bookTitle});
+class _BookProgressSummary extends StatelessWidget {
+  const _BookProgressSummary({
+    required this.state,
+    required this.showPercent,
+    required this.onTap,
+  });
 
-  final String bookTitle;
+  final PlayerState state;
+  final bool showPercent;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:textPrimary, :textSecondary) = context.appColors;
+    final AppColors(:textSecondary, :elevated, :accent) = context.appColors;
+    final label = showPercent ? _percentLabel() : _remainingLabel();
+
+    return Center(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: const .all(.circular(999)),
+            color: elevated.withValues(alpha: 0.14),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.16),
+                blurRadius: 36,
+                spreadRadius: 4,
+                offset: const Offset(0, -14),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const .symmetric(
+              horizontal: AppDimensions.playerBookProgressHPadding,
+              vertical: AppDimensions.playerBookProgressVPadding,
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: Text(
+                label,
+                key: ValueKey(label),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textSecondary.withValues(alpha: 0.74),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _remainingLabel() {
+    final total = state.totalDuration;
+    if (total <= .zero) return 'Время до конца книги';
+    final remaining = total - _bookPosition();
+    return '${_formatHumanDuration(remaining.isNegative ? .zero : remaining)} до конца книги';
+  }
+
+  String _percentLabel() {
+    final totalMs = state.totalDuration.inMilliseconds;
+    if (totalMs <= 0) return '0% от всей книги';
+    final listenedMs = _bookPosition().inMilliseconds.clamp(0, totalMs);
+    final percent = (listenedMs / totalMs * 100).round().clamp(0, 100);
+    return '$percent% от всей книги';
+  }
+
+  Duration _bookPosition() {
+    int playedMs = state.position.inMilliseconds;
+    for (int i = 0; i < state.chapterIndex && i < state.chapters.length; i++) {
+      playedMs += state.chapters[i].durationMs;
+    }
+    return Duration(milliseconds: playedMs);
+  }
+
+  String _formatHumanDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    if (hours > 0) {
+      return '$hours ч ${minutes.toString().padLeft(2, '0')} мин';
+    }
+    return '$minutes мин';
+  }
+}
+
+class _PlayerHeader extends StatelessWidget {
+  const _PlayerHeader({required this.bookTitle, required this.bookAuthor});
+
+  final String bookTitle;
+  final String bookAuthor;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors(:textPrimary, :textSecondary, :textTertiary) =
+        context.appColors;
     return Row(
       children: [
         IconButton(
@@ -176,15 +285,32 @@ class _PlayerHeader extends StatelessWidget {
           icon: Icon(Icons.keyboard_arrow_down, color: textPrimary),
         ),
         Expanded(
-          child: Text(
-            bookTitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                bookTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Gap(2),
+              Text(
+                bookAuthor,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textTertiary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
         IconButton(
