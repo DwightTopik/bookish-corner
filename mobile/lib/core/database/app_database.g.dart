@@ -1407,6 +1407,18 @@ class $BookChaptersTable extends BookChapters
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _startOffsetMsMeta = const VerificationMeta(
+    'startOffsetMs',
+  );
+  @override
+  late final GeneratedColumn<int> startOffsetMs = GeneratedColumn<int>(
+    'start_offset_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1415,6 +1427,7 @@ class $BookChaptersTable extends BookChapters
     filePath,
     title,
     duration,
+    startOffsetMs,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1469,6 +1482,15 @@ class $BookChaptersTable extends BookChapters
         duration.isAcceptableOrUnknown(data['duration']!, _durationMeta),
       );
     }
+    if (data.containsKey('start_offset_ms')) {
+      context.handle(
+        _startOffsetMsMeta,
+        startOffsetMs.isAcceptableOrUnknown(
+          data['start_offset_ms']!,
+          _startOffsetMsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1502,6 +1524,10 @@ class $BookChaptersTable extends BookChapters
         DriftSqlType.int,
         data['${effectivePrefix}duration'],
       ),
+      startOffsetMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_offset_ms'],
+      )!,
     );
   }
 
@@ -1518,6 +1544,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
   final String filePath;
   final String? title;
   final int? duration;
+  final int startOffsetMs;
   const BookChapterRow({
     required this.id,
     required this.bookId,
@@ -1525,6 +1552,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
     required this.filePath,
     this.title,
     this.duration,
+    required this.startOffsetMs,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1539,6 +1567,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
     if (!nullToAbsent || duration != null) {
       map['duration'] = Variable<int>(duration);
     }
+    map['start_offset_ms'] = Variable<int>(startOffsetMs);
     return map;
   }
 
@@ -1554,6 +1583,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
       duration: duration == null && nullToAbsent
           ? const Value.absent()
           : Value(duration),
+      startOffsetMs: Value(startOffsetMs),
     );
   }
 
@@ -1569,6 +1599,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
       filePath: serializer.fromJson<String>(json['filePath']),
       title: serializer.fromJson<String?>(json['title']),
       duration: serializer.fromJson<int?>(json['duration']),
+      startOffsetMs: serializer.fromJson<int>(json['startOffsetMs']),
     );
   }
   @override
@@ -1581,6 +1612,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
       'filePath': serializer.toJson<String>(filePath),
       'title': serializer.toJson<String?>(title),
       'duration': serializer.toJson<int?>(duration),
+      'startOffsetMs': serializer.toJson<int>(startOffsetMs),
     };
   }
 
@@ -1591,6 +1623,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
     String? filePath,
     Value<String?> title = const Value.absent(),
     Value<int?> duration = const Value.absent(),
+    int? startOffsetMs,
   }) => BookChapterRow(
     id: id ?? this.id,
     bookId: bookId ?? this.bookId,
@@ -1598,6 +1631,7 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
     filePath: filePath ?? this.filePath,
     title: title.present ? title.value : this.title,
     duration: duration.present ? duration.value : this.duration,
+    startOffsetMs: startOffsetMs ?? this.startOffsetMs,
   );
   BookChapterRow copyWithCompanion(BookChaptersCompanion data) {
     return BookChapterRow(
@@ -1607,6 +1641,9 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
       filePath: data.filePath.present ? data.filePath.value : this.filePath,
       title: data.title.present ? data.title.value : this.title,
       duration: data.duration.present ? data.duration.value : this.duration,
+      startOffsetMs: data.startOffsetMs.present
+          ? data.startOffsetMs.value
+          : this.startOffsetMs,
     );
   }
 
@@ -1618,14 +1655,22 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
           ..write('position: $position, ')
           ..write('filePath: $filePath, ')
           ..write('title: $title, ')
-          ..write('duration: $duration')
+          ..write('duration: $duration, ')
+          ..write('startOffsetMs: $startOffsetMs')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, bookId, position, filePath, title, duration);
+  int get hashCode => Object.hash(
+    id,
+    bookId,
+    position,
+    filePath,
+    title,
+    duration,
+    startOffsetMs,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1635,7 +1680,8 @@ class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
           other.position == this.position &&
           other.filePath == this.filePath &&
           other.title == this.title &&
-          other.duration == this.duration);
+          other.duration == this.duration &&
+          other.startOffsetMs == this.startOffsetMs);
 }
 
 class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
@@ -1645,6 +1691,7 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
   final Value<String> filePath;
   final Value<String?> title;
   final Value<int?> duration;
+  final Value<int> startOffsetMs;
   final Value<int> rowid;
   const BookChaptersCompanion({
     this.id = const Value.absent(),
@@ -1653,6 +1700,7 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
     this.filePath = const Value.absent(),
     this.title = const Value.absent(),
     this.duration = const Value.absent(),
+    this.startOffsetMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BookChaptersCompanion.insert({
@@ -1662,6 +1710,7 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
     required String filePath,
     this.title = const Value.absent(),
     this.duration = const Value.absent(),
+    this.startOffsetMs = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        bookId = Value(bookId),
@@ -1674,6 +1723,7 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
     Expression<String>? filePath,
     Expression<String>? title,
     Expression<int>? duration,
+    Expression<int>? startOffsetMs,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1683,6 +1733,7 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
       if (filePath != null) 'file_path': filePath,
       if (title != null) 'title': title,
       if (duration != null) 'duration': duration,
+      if (startOffsetMs != null) 'start_offset_ms': startOffsetMs,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1694,6 +1745,7 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
     Value<String>? filePath,
     Value<String?>? title,
     Value<int?>? duration,
+    Value<int>? startOffsetMs,
     Value<int>? rowid,
   }) {
     return BookChaptersCompanion(
@@ -1703,6 +1755,7 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
       filePath: filePath ?? this.filePath,
       title: title ?? this.title,
       duration: duration ?? this.duration,
+      startOffsetMs: startOffsetMs ?? this.startOffsetMs,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1728,6 +1781,9 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
     if (duration.present) {
       map['duration'] = Variable<int>(duration.value);
     }
+    if (startOffsetMs.present) {
+      map['start_offset_ms'] = Variable<int>(startOffsetMs.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1743,6 +1799,333 @@ class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
           ..write('filePath: $filePath, ')
           ..write('title: $title, ')
           ..write('duration: $duration, ')
+          ..write('startOffsetMs: $startOffsetMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AudioProgressTable extends AudioProgress
+    with TableInfo<$AudioProgressTable, AudioProgressRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AudioProgressTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _bookIdMeta = const VerificationMeta('bookId');
+  @override
+  late final GeneratedColumn<String> bookId = GeneratedColumn<String>(
+    'book_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _chapterIndexMeta = const VerificationMeta(
+    'chapterIndex',
+  );
+  @override
+  late final GeneratedColumn<int> chapterIndex = GeneratedColumn<int>(
+    'chapter_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _positionMsMeta = const VerificationMeta(
+    'positionMs',
+  );
+  @override
+  late final GeneratedColumn<int> positionMs = GeneratedColumn<int>(
+    'position_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    bookId,
+    chapterIndex,
+    positionMs,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'audio_progress';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AudioProgressRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('book_id')) {
+      context.handle(
+        _bookIdMeta,
+        bookId.isAcceptableOrUnknown(data['book_id']!, _bookIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bookIdMeta);
+    }
+    if (data.containsKey('chapter_index')) {
+      context.handle(
+        _chapterIndexMeta,
+        chapterIndex.isAcceptableOrUnknown(
+          data['chapter_index']!,
+          _chapterIndexMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_chapterIndexMeta);
+    }
+    if (data.containsKey('position_ms')) {
+      context.handle(
+        _positionMsMeta,
+        positionMs.isAcceptableOrUnknown(data['position_ms']!, _positionMsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMsMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {bookId};
+  @override
+  AudioProgressRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AudioProgressRow(
+      bookId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}book_id'],
+      )!,
+      chapterIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}chapter_index'],
+      )!,
+      positionMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position_ms'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AudioProgressTable createAlias(String alias) {
+    return $AudioProgressTable(attachedDatabase, alias);
+  }
+}
+
+class AudioProgressRow extends DataClass
+    implements Insertable<AudioProgressRow> {
+  final String bookId;
+  final int chapterIndex;
+  final int positionMs;
+  final DateTime updatedAt;
+  const AudioProgressRow({
+    required this.bookId,
+    required this.chapterIndex,
+    required this.positionMs,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['book_id'] = Variable<String>(bookId);
+    map['chapter_index'] = Variable<int>(chapterIndex);
+    map['position_ms'] = Variable<int>(positionMs);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AudioProgressCompanion toCompanion(bool nullToAbsent) {
+    return AudioProgressCompanion(
+      bookId: Value(bookId),
+      chapterIndex: Value(chapterIndex),
+      positionMs: Value(positionMs),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AudioProgressRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AudioProgressRow(
+      bookId: serializer.fromJson<String>(json['bookId']),
+      chapterIndex: serializer.fromJson<int>(json['chapterIndex']),
+      positionMs: serializer.fromJson<int>(json['positionMs']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'bookId': serializer.toJson<String>(bookId),
+      'chapterIndex': serializer.toJson<int>(chapterIndex),
+      'positionMs': serializer.toJson<int>(positionMs),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AudioProgressRow copyWith({
+    String? bookId,
+    int? chapterIndex,
+    int? positionMs,
+    DateTime? updatedAt,
+  }) => AudioProgressRow(
+    bookId: bookId ?? this.bookId,
+    chapterIndex: chapterIndex ?? this.chapterIndex,
+    positionMs: positionMs ?? this.positionMs,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AudioProgressRow copyWithCompanion(AudioProgressCompanion data) {
+    return AudioProgressRow(
+      bookId: data.bookId.present ? data.bookId.value : this.bookId,
+      chapterIndex: data.chapterIndex.present
+          ? data.chapterIndex.value
+          : this.chapterIndex,
+      positionMs: data.positionMs.present
+          ? data.positionMs.value
+          : this.positionMs,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AudioProgressRow(')
+          ..write('bookId: $bookId, ')
+          ..write('chapterIndex: $chapterIndex, ')
+          ..write('positionMs: $positionMs, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(bookId, chapterIndex, positionMs, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AudioProgressRow &&
+          other.bookId == this.bookId &&
+          other.chapterIndex == this.chapterIndex &&
+          other.positionMs == this.positionMs &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AudioProgressCompanion extends UpdateCompanion<AudioProgressRow> {
+  final Value<String> bookId;
+  final Value<int> chapterIndex;
+  final Value<int> positionMs;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AudioProgressCompanion({
+    this.bookId = const Value.absent(),
+    this.chapterIndex = const Value.absent(),
+    this.positionMs = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AudioProgressCompanion.insert({
+    required String bookId,
+    required int chapterIndex,
+    required int positionMs,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : bookId = Value(bookId),
+       chapterIndex = Value(chapterIndex),
+       positionMs = Value(positionMs),
+       updatedAt = Value(updatedAt);
+  static Insertable<AudioProgressRow> custom({
+    Expression<String>? bookId,
+    Expression<int>? chapterIndex,
+    Expression<int>? positionMs,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (bookId != null) 'book_id': bookId,
+      if (chapterIndex != null) 'chapter_index': chapterIndex,
+      if (positionMs != null) 'position_ms': positionMs,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AudioProgressCompanion copyWith({
+    Value<String>? bookId,
+    Value<int>? chapterIndex,
+    Value<int>? positionMs,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AudioProgressCompanion(
+      bookId: bookId ?? this.bookId,
+      chapterIndex: chapterIndex ?? this.chapterIndex,
+      positionMs: positionMs ?? this.positionMs,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (bookId.present) {
+      map['book_id'] = Variable<String>(bookId.value);
+    }
+    if (chapterIndex.present) {
+      map['chapter_index'] = Variable<int>(chapterIndex.value);
+    }
+    if (positionMs.present) {
+      map['position_ms'] = Variable<int>(positionMs.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AudioProgressCompanion(')
+          ..write('bookId: $bookId, ')
+          ..write('chapterIndex: $chapterIndex, ')
+          ..write('positionMs: $positionMs, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1754,11 +2137,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $BooksTable books = $BooksTable(this);
   late final $BookChaptersTable bookChapters = $BookChaptersTable(this);
+  late final $AudioProgressTable audioProgress = $AudioProgressTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [books, bookChapters];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    books,
+    bookChapters,
+    audioProgress,
+  ];
 }
 
 typedef $$BooksTableCreateCompanionBuilder =
@@ -2347,6 +2735,7 @@ typedef $$BookChaptersTableCreateCompanionBuilder =
       required String filePath,
       Value<String?> title,
       Value<int?> duration,
+      Value<int> startOffsetMs,
       Value<int> rowid,
     });
 typedef $$BookChaptersTableUpdateCompanionBuilder =
@@ -2357,6 +2746,7 @@ typedef $$BookChaptersTableUpdateCompanionBuilder =
       Value<String> filePath,
       Value<String?> title,
       Value<int?> duration,
+      Value<int> startOffsetMs,
       Value<int> rowid,
     });
 
@@ -2396,6 +2786,11 @@ class $$BookChaptersTableFilterComposer
 
   ColumnFilters<int> get duration => $composableBuilder(
     column: $table.duration,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startOffsetMs => $composableBuilder(
+    column: $table.startOffsetMs,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2438,6 +2833,11 @@ class $$BookChaptersTableOrderingComposer
     column: $table.duration,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get startOffsetMs => $composableBuilder(
+    column: $table.startOffsetMs,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$BookChaptersTableAnnotationComposer
@@ -2466,6 +2866,11 @@ class $$BookChaptersTableAnnotationComposer
 
   GeneratedColumn<int> get duration =>
       $composableBuilder(column: $table.duration, builder: (column) => column);
+
+  GeneratedColumn<int> get startOffsetMs => $composableBuilder(
+    column: $table.startOffsetMs,
+    builder: (column) => column,
+  );
 }
 
 class $$BookChaptersTableTableManager
@@ -2505,6 +2910,7 @@ class $$BookChaptersTableTableManager
                 Value<String> filePath = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
+                Value<int> startOffsetMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BookChaptersCompanion(
                 id: id,
@@ -2513,6 +2919,7 @@ class $$BookChaptersTableTableManager
                 filePath: filePath,
                 title: title,
                 duration: duration,
+                startOffsetMs: startOffsetMs,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2523,6 +2930,7 @@ class $$BookChaptersTableTableManager
                 required String filePath,
                 Value<String?> title = const Value.absent(),
                 Value<int?> duration = const Value.absent(),
+                Value<int> startOffsetMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BookChaptersCompanion.insert(
                 id: id,
@@ -2531,6 +2939,7 @@ class $$BookChaptersTableTableManager
                 filePath: filePath,
                 title: title,
                 duration: duration,
+                startOffsetMs: startOffsetMs,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2558,6 +2967,195 @@ typedef $$BookChaptersTableProcessedTableManager =
       BookChapterRow,
       PrefetchHooks Function()
     >;
+typedef $$AudioProgressTableCreateCompanionBuilder =
+    AudioProgressCompanion Function({
+      required String bookId,
+      required int chapterIndex,
+      required int positionMs,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AudioProgressTableUpdateCompanionBuilder =
+    AudioProgressCompanion Function({
+      Value<String> bookId,
+      Value<int> chapterIndex,
+      Value<int> positionMs,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AudioProgressTableFilterComposer
+    extends Composer<_$AppDatabase, $AudioProgressTable> {
+  $$AudioProgressTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get chapterIndex => $composableBuilder(
+    column: $table.chapterIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AudioProgressTableOrderingComposer
+    extends Composer<_$AppDatabase, $AudioProgressTable> {
+  $$AudioProgressTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get chapterIndex => $composableBuilder(
+    column: $table.chapterIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AudioProgressTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AudioProgressTable> {
+  $$AudioProgressTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get bookId =>
+      $composableBuilder(column: $table.bookId, builder: (column) => column);
+
+  GeneratedColumn<int> get chapterIndex => $composableBuilder(
+    column: $table.chapterIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AudioProgressTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AudioProgressTable,
+          AudioProgressRow,
+          $$AudioProgressTableFilterComposer,
+          $$AudioProgressTableOrderingComposer,
+          $$AudioProgressTableAnnotationComposer,
+          $$AudioProgressTableCreateCompanionBuilder,
+          $$AudioProgressTableUpdateCompanionBuilder,
+          (
+            AudioProgressRow,
+            BaseReferences<
+              _$AppDatabase,
+              $AudioProgressTable,
+              AudioProgressRow
+            >,
+          ),
+          AudioProgressRow,
+          PrefetchHooks Function()
+        > {
+  $$AudioProgressTableTableManager(_$AppDatabase db, $AudioProgressTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AudioProgressTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AudioProgressTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AudioProgressTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> bookId = const Value.absent(),
+                Value<int> chapterIndex = const Value.absent(),
+                Value<int> positionMs = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AudioProgressCompanion(
+                bookId: bookId,
+                chapterIndex: chapterIndex,
+                positionMs: positionMs,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String bookId,
+                required int chapterIndex,
+                required int positionMs,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AudioProgressCompanion.insert(
+                bookId: bookId,
+                chapterIndex: chapterIndex,
+                positionMs: positionMs,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AudioProgressTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AudioProgressTable,
+      AudioProgressRow,
+      $$AudioProgressTableFilterComposer,
+      $$AudioProgressTableOrderingComposer,
+      $$AudioProgressTableAnnotationComposer,
+      $$AudioProgressTableCreateCompanionBuilder,
+      $$AudioProgressTableUpdateCompanionBuilder,
+      (
+        AudioProgressRow,
+        BaseReferences<_$AppDatabase, $AudioProgressTable, AudioProgressRow>,
+      ),
+      AudioProgressRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2566,4 +3164,6 @@ class $AppDatabaseManager {
       $$BooksTableTableManager(_db, _db.books);
   $$BookChaptersTableTableManager get bookChapters =>
       $$BookChaptersTableTableManager(_db, _db.bookChapters);
+  $$AudioProgressTableTableManager get audioProgress =>
+      $$AudioProgressTableTableManager(_db, _db.audioProgress);
 }

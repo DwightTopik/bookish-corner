@@ -6,6 +6,7 @@ class BookChapter {
     required this.filePath,
     this.title,
     this.duration,
+    this.startOffsetMs = 0,
   });
 
   final String id;
@@ -14,6 +15,7 @@ class BookChapter {
   final String filePath;
   final String? title;
   final int? duration;
+  final int startOffsetMs;
 
   BookChapter copyWith({
     String? id,
@@ -22,6 +24,7 @@ class BookChapter {
     String? filePath,
     String? title,
     int? duration,
+    int? startOffsetMs,
   }) {
     return BookChapter(
       id: id ?? this.id,
@@ -30,6 +33,7 @@ class BookChapter {
       filePath: filePath ?? this.filePath,
       title: title ?? this.title,
       duration: duration ?? this.duration,
+      startOffsetMs: startOffsetMs ?? this.startOffsetMs,
     );
   }
 }
