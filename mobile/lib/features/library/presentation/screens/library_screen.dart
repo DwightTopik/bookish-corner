@@ -63,7 +63,11 @@ class LibraryScreen extends ConsumerWidget {
       ),
       body: booksAsync.when(
         data: (books) {
-          if (books.isEmpty) return const LibraryEmptyView();
+          if (books.isEmpty) {
+            return LibraryEmptyView(
+              onAddPressed: () => _showAddOptions(context, ref),
+            );
+          }
           return ListView.builder(
             padding: const .symmetric(vertical: 8),
             itemCount: books.length,
