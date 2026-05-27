@@ -26,6 +26,7 @@ class Book {
     this.description,
     this.language,
     this.pageCount,
+    this.coverImagePath,
   });
 
   final String id;
@@ -51,6 +52,7 @@ class Book {
   final String? description;
   final String? language;
   final int? pageCount;
+  final String? coverImagePath;
 
   Book copyWith({
     String? id,
@@ -76,6 +78,7 @@ class Book {
     String? description,
     String? language,
     int? pageCount,
+    String? coverImagePath,
   }) {
     return Book(
       id: id ?? this.id,
@@ -101,6 +104,7 @@ class Book {
       description: description ?? this.description,
       language: language ?? this.language,
       pageCount: pageCount ?? this.pageCount,
+      coverImagePath: coverImagePath ?? this.coverImagePath,
     );
   }
 }

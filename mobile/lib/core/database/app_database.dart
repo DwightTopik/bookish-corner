@@ -29,16 +29,46 @@ class Books extends Table {
   TextColumn get description => text().nullable()();
   TextColumn get language => text().nullable()();
   IntColumn get pageCount => integer().nullable()();
+  TextColumn get coverImagePath => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Books])
+@DataClassName('BookChapterRow')
+class BookChapters extends Table {
+  TextColumn get id => text()();
+  TextColumn get bookId =>
+      text().references(Books, #id, onDelete: KeyAction.cascade)();
+  IntColumn get position => integer()();
+  TextColumn get filePath => text()();
+  TextColumn get title => text().nullable()();
+  IntColumn get duration => integer().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Books, BookChapters])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'bookish'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => .new(
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON');
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(books, books.coverImagePath);
+          }
+          if (from < 3) {
+            await m.createTable(bookChapters);
+          }
+        },
+      );
 }

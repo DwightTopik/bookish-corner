@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/features/library/presentation/providers/add_book_action.dart';
 
-class LibraryEmptyView extends StatelessWidget {
+class LibraryEmptyView extends ConsumerWidget {
   const LibraryEmptyView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final AppColors(:textTertiary, :textSecondary, :accent) = context.appColors;
     return Center(
       child: Padding(
@@ -31,7 +32,7 @@ class LibraryEmptyView extends StatelessWidget {
             ),
             const Gap(24),
             FilledButton.icon(
-              onPressed: () => context.push('/library/add'),
+              onPressed: () => pickAndAddBook(ref),
               icon: const Icon(Icons.add),
               label: const Text('Добавить книгу'),
               style: FilledButton.styleFrom(

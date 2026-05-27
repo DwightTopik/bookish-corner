@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,8 +28,10 @@ class BookListTile extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: elevated,
-        title: const Text('Удалить книгу?'),
-        content: Text('«${book.title}» будет удалена из библиотеки.'),
+        title: const Text('Подтвердить удаление'),
+        content: const Text(
+          'Вы уверены, что хотите удалить выбранную книгу?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -43,6 +47,12 @@ class BookListTile extends ConsumerWidget {
     );
     if (confirmed ?? false) {
       await ref.read(bookRepositoryProvider).deleteBook(book.id);
+      final coverPath = book.coverImagePath;
+      if (coverPath != null) {
+        try {
+          await File(coverPath).delete();
+        } catch (_) {}
+      }
     }
   }
 
@@ -81,8 +91,8 @@ class _BookCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:border, :accent) = context.appColors;
-    final showProgress = book.readingProgress > 0;
+    // Audio covers are square (1:1); all other formats use a portrait rectangle.
+    final coverHeight = book.format.isAudio ? 80.0 : 120.0;
     return SizedBox(
       width: 80,
       child: Column(
@@ -91,31 +101,78 @@ class _BookCover extends StatelessWidget {
             borderRadius: const .all(.circular(8)),
             child: SizedBox(
               width: 80,
-              height: 120,
-              child: book.coverUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: book.coverUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const _CoverPlaceholder(),
-                      errorWidget: (context, url, error) =>
-                          const _CoverPlaceholder(),
-                    )
-                  : const _CoverPlaceholder(),
+              height: coverHeight,
+              child: _CoverImage(book: book),
             ),
           ),
-          if (showProgress) ...[
-            const Gap(6),
-            ClipRRect(
-              borderRadius: const .all(.circular(2)),
-              child: LinearProgressIndicator(
-                value: book.readingProgress.clamp(0.0, 1.0),
-                minHeight: 3,
-                backgroundColor: border,
-                color: accent,
-              ),
-            ),
-          ],
+          const Gap(6),
+          _ProgressIndicator(book: book),
         ],
+      ),
+    );
+  }
+}
+
+class _CoverImage extends StatelessWidget {
+  const _CoverImage({required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    final localPath = book.coverImagePath;
+    if (localPath != null) {
+      return Image.file(
+        File(localPath),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const _CoverPlaceholder(),
+      );
+    }
+    final url = book.coverUrl;
+    if (url != null) {
+      return CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.cover,
+        placeholder: (context, _) => const _CoverPlaceholder(),
+        errorWidget: (context, _, _) => const _CoverPlaceholder(),
+      );
+    }
+    return const _CoverPlaceholder();
+  }
+}
+
+class _ProgressIndicator extends StatelessWidget {
+  const _ProgressIndicator({required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors(:border, :accent) = context.appColors;
+    if (book.readingStatus == .finished) {
+      return Container(
+        padding: const .symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: accent,
+          borderRadius: const .all(.circular(6)),
+        ),
+        child: const Text(
+          'Прочитано',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+    return ClipRRect(
+      borderRadius: const .all(.circular(2)),
+      child: LinearProgressIndicator(
+        value: book.readingProgress.clamp(0.0, 1.0),
+        minHeight: 3,
+        backgroundColor: border,
+        color: accent,
       ),
     );
   }
@@ -248,18 +305,9 @@ class _StatusRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:success, :textPrimary, :accent) = context.appColors;
-    if (book.readingStatus == .finished) {
-      return Text(
-        'Прочитано',
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: success,
-        ),
-      );
-    }
-    if (book.readingStatus == .reading && book.readingProgress > 0) {
+    final AppColors(:textPrimary, :accent) = context.appColors;
+    if (book.readingStatus == .reading &&
+        book.readingProgress > 0) {
       final percent = (book.readingProgress * 100).round();
       final label = book.format.isAudio ? 'Слушать дальше' : 'Читать дальше';
       return Row(

@@ -253,6 +253,17 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _coverImagePathMeta = const VerificationMeta(
+    'coverImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> coverImagePath = GeneratedColumn<String>(
+    'cover_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -278,6 +289,7 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
     description,
     language,
     pageCount,
+    coverImagePath,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -462,6 +474,15 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
         pageCount.isAcceptableOrUnknown(data['page_count']!, _pageCountMeta),
       );
     }
+    if (data.containsKey('cover_image_path')) {
+      context.handle(
+        _coverImagePathMeta,
+        coverImagePath.isAcceptableOrUnknown(
+          data['cover_image_path']!,
+          _coverImagePathMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -563,6 +584,10 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
         DriftSqlType.int,
         data['${effectivePrefix}page_count'],
       ),
+      coverImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image_path'],
+      ),
     );
   }
 
@@ -596,6 +621,7 @@ class BookRow extends DataClass implements Insertable<BookRow> {
   final String? description;
   final String? language;
   final int? pageCount;
+  final String? coverImagePath;
   const BookRow({
     required this.id,
     required this.title,
@@ -620,6 +646,7 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     this.description,
     this.language,
     this.pageCount,
+    this.coverImagePath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -676,6 +703,9 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     }
     if (!nullToAbsent || pageCount != null) {
       map['page_count'] = Variable<int>(pageCount);
+    }
+    if (!nullToAbsent || coverImagePath != null) {
+      map['cover_image_path'] = Variable<String>(coverImagePath);
     }
     return map;
   }
@@ -735,6 +765,9 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       pageCount: pageCount == null && nullToAbsent
           ? const Value.absent()
           : Value(pageCount),
+      coverImagePath: coverImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverImagePath),
     );
   }
 
@@ -767,6 +800,7 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       description: serializer.fromJson<String?>(json['description']),
       language: serializer.fromJson<String?>(json['language']),
       pageCount: serializer.fromJson<int?>(json['pageCount']),
+      coverImagePath: serializer.fromJson<String?>(json['coverImagePath']),
     );
   }
   @override
@@ -796,6 +830,7 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       'description': serializer.toJson<String?>(description),
       'language': serializer.toJson<String?>(language),
       'pageCount': serializer.toJson<int?>(pageCount),
+      'coverImagePath': serializer.toJson<String?>(coverImagePath),
     };
   }
 
@@ -823,6 +858,7 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     Value<String?> description = const Value.absent(),
     Value<String?> language = const Value.absent(),
     Value<int?> pageCount = const Value.absent(),
+    Value<String?> coverImagePath = const Value.absent(),
   }) => BookRow(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -849,6 +885,9 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     description: description.present ? description.value : this.description,
     language: language.present ? language.value : this.language,
     pageCount: pageCount.present ? pageCount.value : this.pageCount,
+    coverImagePath: coverImagePath.present
+        ? coverImagePath.value
+        : this.coverImagePath,
   );
   BookRow copyWithCompanion(BooksCompanion data) {
     return BookRow(
@@ -897,6 +936,9 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           : this.description,
       language: data.language.present ? data.language.value : this.language,
       pageCount: data.pageCount.present ? data.pageCount.value : this.pageCount,
+      coverImagePath: data.coverImagePath.present
+          ? data.coverImagePath.value
+          : this.coverImagePath,
     );
   }
 
@@ -925,7 +967,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           ..write('ratingCount: $ratingCount, ')
           ..write('description: $description, ')
           ..write('language: $language, ')
-          ..write('pageCount: $pageCount')
+          ..write('pageCount: $pageCount, ')
+          ..write('coverImagePath: $coverImagePath')
           ..write(')'))
         .toString();
   }
@@ -955,6 +998,7 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     description,
     language,
     pageCount,
+    coverImagePath,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -982,7 +1026,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           other.ratingCount == this.ratingCount &&
           other.description == this.description &&
           other.language == this.language &&
-          other.pageCount == this.pageCount);
+          other.pageCount == this.pageCount &&
+          other.coverImagePath == this.coverImagePath);
 }
 
 class BooksCompanion extends UpdateCompanion<BookRow> {
@@ -1009,6 +1054,7 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
   final Value<String?> description;
   final Value<String?> language;
   final Value<int?> pageCount;
+  final Value<String?> coverImagePath;
   final Value<int> rowid;
   const BooksCompanion({
     this.id = const Value.absent(),
@@ -1034,6 +1080,7 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     this.description = const Value.absent(),
     this.language = const Value.absent(),
     this.pageCount = const Value.absent(),
+    this.coverImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BooksCompanion.insert({
@@ -1060,6 +1107,7 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     this.description = const Value.absent(),
     this.language = const Value.absent(),
     this.pageCount = const Value.absent(),
+    this.coverImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -1091,6 +1139,7 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     Expression<String>? description,
     Expression<String>? language,
     Expression<int>? pageCount,
+    Expression<String>? coverImagePath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1117,6 +1166,7 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
       if (description != null) 'description': description,
       if (language != null) 'language': language,
       if (pageCount != null) 'page_count': pageCount,
+      if (coverImagePath != null) 'cover_image_path': coverImagePath,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1145,6 +1195,7 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     Value<String?>? description,
     Value<String?>? language,
     Value<int?>? pageCount,
+    Value<String?>? coverImagePath,
     Value<int>? rowid,
   }) {
     return BooksCompanion(
@@ -1171,6 +1222,7 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
       description: description ?? this.description,
       language: language ?? this.language,
       pageCount: pageCount ?? this.pageCount,
+      coverImagePath: coverImagePath ?? this.coverImagePath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1247,6 +1299,9 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     if (pageCount.present) {
       map['page_count'] = Variable<int>(pageCount.value);
     }
+    if (coverImagePath.present) {
+      map['cover_image_path'] = Variable<String>(coverImagePath.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1279,6 +1334,415 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
           ..write('description: $description, ')
           ..write('language: $language, ')
           ..write('pageCount: $pageCount, ')
+          ..write('coverImagePath: $coverImagePath, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BookChaptersTable extends BookChapters
+    with TableInfo<$BookChaptersTable, BookChapterRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BookChaptersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bookIdMeta = const VerificationMeta('bookId');
+  @override
+  late final GeneratedColumn<String> bookId = GeneratedColumn<String>(
+    'book_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _filePathMeta = const VerificationMeta(
+    'filePath',
+  );
+  @override
+  late final GeneratedColumn<String> filePath = GeneratedColumn<String>(
+    'file_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _durationMeta = const VerificationMeta(
+    'duration',
+  );
+  @override
+  late final GeneratedColumn<int> duration = GeneratedColumn<int>(
+    'duration',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    bookId,
+    position,
+    filePath,
+    title,
+    duration,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'book_chapters';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BookChapterRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('book_id')) {
+      context.handle(
+        _bookIdMeta,
+        bookId.isAcceptableOrUnknown(data['book_id']!, _bookIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bookIdMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('file_path')) {
+      context.handle(
+        _filePathMeta,
+        filePath.isAcceptableOrUnknown(data['file_path']!, _filePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_filePathMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('duration')) {
+      context.handle(
+        _durationMeta,
+        duration.isAcceptableOrUnknown(data['duration']!, _durationMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BookChapterRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BookChapterRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      bookId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}book_id'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      filePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_path'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      duration: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration'],
+      ),
+    );
+  }
+
+  @override
+  $BookChaptersTable createAlias(String alias) {
+    return $BookChaptersTable(attachedDatabase, alias);
+  }
+}
+
+class BookChapterRow extends DataClass implements Insertable<BookChapterRow> {
+  final String id;
+  final String bookId;
+  final int position;
+  final String filePath;
+  final String? title;
+  final int? duration;
+  const BookChapterRow({
+    required this.id,
+    required this.bookId,
+    required this.position,
+    required this.filePath,
+    this.title,
+    this.duration,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['book_id'] = Variable<String>(bookId);
+    map['position'] = Variable<int>(position);
+    map['file_path'] = Variable<String>(filePath);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || duration != null) {
+      map['duration'] = Variable<int>(duration);
+    }
+    return map;
+  }
+
+  BookChaptersCompanion toCompanion(bool nullToAbsent) {
+    return BookChaptersCompanion(
+      id: Value(id),
+      bookId: Value(bookId),
+      position: Value(position),
+      filePath: Value(filePath),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      duration: duration == null && nullToAbsent
+          ? const Value.absent()
+          : Value(duration),
+    );
+  }
+
+  factory BookChapterRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BookChapterRow(
+      id: serializer.fromJson<String>(json['id']),
+      bookId: serializer.fromJson<String>(json['bookId']),
+      position: serializer.fromJson<int>(json['position']),
+      filePath: serializer.fromJson<String>(json['filePath']),
+      title: serializer.fromJson<String?>(json['title']),
+      duration: serializer.fromJson<int?>(json['duration']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'bookId': serializer.toJson<String>(bookId),
+      'position': serializer.toJson<int>(position),
+      'filePath': serializer.toJson<String>(filePath),
+      'title': serializer.toJson<String?>(title),
+      'duration': serializer.toJson<int?>(duration),
+    };
+  }
+
+  BookChapterRow copyWith({
+    String? id,
+    String? bookId,
+    int? position,
+    String? filePath,
+    Value<String?> title = const Value.absent(),
+    Value<int?> duration = const Value.absent(),
+  }) => BookChapterRow(
+    id: id ?? this.id,
+    bookId: bookId ?? this.bookId,
+    position: position ?? this.position,
+    filePath: filePath ?? this.filePath,
+    title: title.present ? title.value : this.title,
+    duration: duration.present ? duration.value : this.duration,
+  );
+  BookChapterRow copyWithCompanion(BookChaptersCompanion data) {
+    return BookChapterRow(
+      id: data.id.present ? data.id.value : this.id,
+      bookId: data.bookId.present ? data.bookId.value : this.bookId,
+      position: data.position.present ? data.position.value : this.position,
+      filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      title: data.title.present ? data.title.value : this.title,
+      duration: data.duration.present ? data.duration.value : this.duration,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BookChapterRow(')
+          ..write('id: $id, ')
+          ..write('bookId: $bookId, ')
+          ..write('position: $position, ')
+          ..write('filePath: $filePath, ')
+          ..write('title: $title, ')
+          ..write('duration: $duration')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, bookId, position, filePath, title, duration);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BookChapterRow &&
+          other.id == this.id &&
+          other.bookId == this.bookId &&
+          other.position == this.position &&
+          other.filePath == this.filePath &&
+          other.title == this.title &&
+          other.duration == this.duration);
+}
+
+class BookChaptersCompanion extends UpdateCompanion<BookChapterRow> {
+  final Value<String> id;
+  final Value<String> bookId;
+  final Value<int> position;
+  final Value<String> filePath;
+  final Value<String?> title;
+  final Value<int?> duration;
+  final Value<int> rowid;
+  const BookChaptersCompanion({
+    this.id = const Value.absent(),
+    this.bookId = const Value.absent(),
+    this.position = const Value.absent(),
+    this.filePath = const Value.absent(),
+    this.title = const Value.absent(),
+    this.duration = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BookChaptersCompanion.insert({
+    required String id,
+    required String bookId,
+    required int position,
+    required String filePath,
+    this.title = const Value.absent(),
+    this.duration = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       bookId = Value(bookId),
+       position = Value(position),
+       filePath = Value(filePath);
+  static Insertable<BookChapterRow> custom({
+    Expression<String>? id,
+    Expression<String>? bookId,
+    Expression<int>? position,
+    Expression<String>? filePath,
+    Expression<String>? title,
+    Expression<int>? duration,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (bookId != null) 'book_id': bookId,
+      if (position != null) 'position': position,
+      if (filePath != null) 'file_path': filePath,
+      if (title != null) 'title': title,
+      if (duration != null) 'duration': duration,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BookChaptersCompanion copyWith({
+    Value<String>? id,
+    Value<String>? bookId,
+    Value<int>? position,
+    Value<String>? filePath,
+    Value<String?>? title,
+    Value<int?>? duration,
+    Value<int>? rowid,
+  }) {
+    return BookChaptersCompanion(
+      id: id ?? this.id,
+      bookId: bookId ?? this.bookId,
+      position: position ?? this.position,
+      filePath: filePath ?? this.filePath,
+      title: title ?? this.title,
+      duration: duration ?? this.duration,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (bookId.present) {
+      map['book_id'] = Variable<String>(bookId.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (filePath.present) {
+      map['file_path'] = Variable<String>(filePath.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (duration.present) {
+      map['duration'] = Variable<int>(duration.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BookChaptersCompanion(')
+          ..write('id: $id, ')
+          ..write('bookId: $bookId, ')
+          ..write('position: $position, ')
+          ..write('filePath: $filePath, ')
+          ..write('title: $title, ')
+          ..write('duration: $duration, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1289,11 +1753,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $BooksTable books = $BooksTable(this);
+  late final $BookChaptersTable bookChapters = $BookChaptersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [books];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [books, bookChapters];
 }
 
 typedef $$BooksTableCreateCompanionBuilder =
@@ -1321,6 +1786,7 @@ typedef $$BooksTableCreateCompanionBuilder =
       Value<String?> description,
       Value<String?> language,
       Value<int?> pageCount,
+      Value<String?> coverImagePath,
       Value<int> rowid,
     });
 typedef $$BooksTableUpdateCompanionBuilder =
@@ -1348,6 +1814,7 @@ typedef $$BooksTableUpdateCompanionBuilder =
       Value<String?> description,
       Value<String?> language,
       Value<int?> pageCount,
+      Value<String?> coverImagePath,
       Value<int> rowid,
     });
 
@@ -1471,6 +1938,11 @@ class $$BooksTableFilterComposer extends Composer<_$AppDatabase, $BooksTable> {
 
   ColumnFilters<int> get pageCount => $composableBuilder(
     column: $table.pageCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverImagePath => $composableBuilder(
+    column: $table.coverImagePath,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1598,6 +2070,11 @@ class $$BooksTableOrderingComposer
     column: $table.pageCount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get coverImagePath => $composableBuilder(
+    column: $table.coverImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$BooksTableAnnotationComposer
@@ -1699,6 +2176,11 @@ class $$BooksTableAnnotationComposer
 
   GeneratedColumn<int> get pageCount =>
       $composableBuilder(column: $table.pageCount, builder: (column) => column);
+
+  GeneratedColumn<String> get coverImagePath => $composableBuilder(
+    column: $table.coverImagePath,
+    builder: (column) => column,
+  );
 }
 
 class $$BooksTableTableManager
@@ -1752,6 +2234,7 @@ class $$BooksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> language = const Value.absent(),
                 Value<int?> pageCount = const Value.absent(),
+                Value<String?> coverImagePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BooksCompanion(
                 id: id,
@@ -1777,6 +2260,7 @@ class $$BooksTableTableManager
                 description: description,
                 language: language,
                 pageCount: pageCount,
+                coverImagePath: coverImagePath,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1804,6 +2288,7 @@ class $$BooksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> language = const Value.absent(),
                 Value<int?> pageCount = const Value.absent(),
+                Value<String?> coverImagePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BooksCompanion.insert(
                 id: id,
@@ -1829,6 +2314,7 @@ class $$BooksTableTableManager
                 description: description,
                 language: language,
                 pageCount: pageCount,
+                coverImagePath: coverImagePath,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1853,10 +2339,231 @@ typedef $$BooksTableProcessedTableManager =
       BookRow,
       PrefetchHooks Function()
     >;
+typedef $$BookChaptersTableCreateCompanionBuilder =
+    BookChaptersCompanion Function({
+      required String id,
+      required String bookId,
+      required int position,
+      required String filePath,
+      Value<String?> title,
+      Value<int?> duration,
+      Value<int> rowid,
+    });
+typedef $$BookChaptersTableUpdateCompanionBuilder =
+    BookChaptersCompanion Function({
+      Value<String> id,
+      Value<String> bookId,
+      Value<int> position,
+      Value<String> filePath,
+      Value<String?> title,
+      Value<int?> duration,
+      Value<int> rowid,
+    });
+
+class $$BookChaptersTableFilterComposer
+    extends Composer<_$AppDatabase, $BookChaptersTable> {
+  $$BookChaptersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get duration => $composableBuilder(
+    column: $table.duration,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BookChaptersTableOrderingComposer
+    extends Composer<_$AppDatabase, $BookChaptersTable> {
+  $$BookChaptersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get duration => $composableBuilder(
+    column: $table.duration,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BookChaptersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BookChaptersTable> {
+  $$BookChaptersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get bookId =>
+      $composableBuilder(column: $table.bookId, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get filePath =>
+      $composableBuilder(column: $table.filePath, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<int> get duration =>
+      $composableBuilder(column: $table.duration, builder: (column) => column);
+}
+
+class $$BookChaptersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BookChaptersTable,
+          BookChapterRow,
+          $$BookChaptersTableFilterComposer,
+          $$BookChaptersTableOrderingComposer,
+          $$BookChaptersTableAnnotationComposer,
+          $$BookChaptersTableCreateCompanionBuilder,
+          $$BookChaptersTableUpdateCompanionBuilder,
+          (
+            BookChapterRow,
+            BaseReferences<_$AppDatabase, $BookChaptersTable, BookChapterRow>,
+          ),
+          BookChapterRow,
+          PrefetchHooks Function()
+        > {
+  $$BookChaptersTableTableManager(_$AppDatabase db, $BookChaptersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BookChaptersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BookChaptersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BookChaptersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> bookId = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<String> filePath = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<int?> duration = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BookChaptersCompanion(
+                id: id,
+                bookId: bookId,
+                position: position,
+                filePath: filePath,
+                title: title,
+                duration: duration,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String bookId,
+                required int position,
+                required String filePath,
+                Value<String?> title = const Value.absent(),
+                Value<int?> duration = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BookChaptersCompanion.insert(
+                id: id,
+                bookId: bookId,
+                position: position,
+                filePath: filePath,
+                title: title,
+                duration: duration,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BookChaptersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BookChaptersTable,
+      BookChapterRow,
+      $$BookChaptersTableFilterComposer,
+      $$BookChaptersTableOrderingComposer,
+      $$BookChaptersTableAnnotationComposer,
+      $$BookChaptersTableCreateCompanionBuilder,
+      $$BookChaptersTableUpdateCompanionBuilder,
+      (
+        BookChapterRow,
+        BaseReferences<_$AppDatabase, $BookChaptersTable, BookChapterRow>,
+      ),
+      BookChapterRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$BooksTableTableManager get books =>
       $$BooksTableTableManager(_db, _db.books);
+  $$BookChaptersTableTableManager get bookChapters =>
+      $$BookChaptersTableTableManager(_db, _db.bookChapters);
 }
