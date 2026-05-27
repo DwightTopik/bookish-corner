@@ -1,13 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/features/library/presentation/providers/add_book_action.dart';
 import 'package:bookish_corner/features/library/presentation/providers/library_providers.dart';
 import 'package:bookish_corner/features/library/presentation/widgets/book_list_tile.dart';
 import 'package:bookish_corner/features/library/presentation/widgets/library_empty_state.dart';
 
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
+
+  void _showAddOptions(BuildContext context, WidgetRef ref) {
+    final elevated = context.appColors.elevated;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: elevated,
+      builder: (sheetCtx) => _AddBookSheet(
+        onAddBook: () {
+          Navigator.of(sheetCtx).pop();
+          pickAndAddBook(ref);
+        },
+        onAddFolder: () {
+          final messenger = ScaffoldMessenger.of(sheetCtx);
+          Navigator.of(sheetCtx).pop();
+          pickAndAddFolder(messenger, ref);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,7 +56,7 @@ class LibraryScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: Icon(Icons.add, color: textPrimary),
-            onPressed: () => context.push('/library/add'),
+            onPressed: () => _showAddOptions(context, ref),
           ),
           const SizedBox(width: 4),
         ],
@@ -62,6 +81,44 @@ class LibraryScreen extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AddBookSheet extends StatelessWidget {
+  const _AddBookSheet({
+    required this.onAddBook,
+    required this.onAddFolder,
+  });
+
+  final VoidCallback onAddBook;
+  final VoidCallback onAddFolder;
+
+  @override
+  Widget build(BuildContext context) {
+    final textPrimary = context.appColors.textPrimary;
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.menu_book_outlined, color: textPrimary),
+            title: Text(
+              'Добавить книгу',
+              style: TextStyle(color: textPrimary),
+            ),
+            onTap: onAddBook,
+          ),
+          ListTile(
+            leading: Icon(Icons.folder_outlined, color: textPrimary),
+            title: Text(
+              'Добавить аудиокнигу',
+              style: TextStyle(color: textPrimary),
+            ),
+            onTap: onAddFolder,
+          ),
+        ],
       ),
     );
   }

@@ -4,11 +4,15 @@ enum BookFormat {
   pdf,
   txt,
   mp3,
-  m4b;
+  m4b,
+  audioFolder;
 
-  bool get isAudio => this == .mp3 || this == .m4b;
+  bool get isAudio => this == .mp3 || this == .m4b || this == .audioFolder;
 
-  String get label => name.toUpperCase();
+  String get label => switch (this) {
+    .audioFolder => 'АУДИО',
+    _ => name.toUpperCase(),
+  };
 
   static const List<String> pickerExtensions = [
     'epub',

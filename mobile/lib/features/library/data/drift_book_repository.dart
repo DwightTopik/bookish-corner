@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:bookish_corner/core/database/app_database.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
+import 'package:bookish_corner/features/library/domain/book_chapter.dart';
 import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/library/domain/book_repository.dart';
 import 'package:bookish_corner/features/library/domain/reading_status.dart';
@@ -26,6 +27,30 @@ class DriftBookRepository implements BookRepository {
   @override
   Future<void> addBook(Book book) async {
     await _db.into(_db.books).insertOnConflictUpdate(_toCompanion(book));
+  }
+
+  @override
+  Future<void> addBookWithChapters(
+    Book book,
+    List<BookChapter> chapters,
+  ) async {
+    await _db.transaction(() async {
+      await _db.into(_db.books).insertOnConflictUpdate(_toCompanion(book));
+      for (final chapter in chapters) {
+        await _db
+            .into(_db.bookChapters)
+            .insert(_chapterToCompanion(chapter));
+      }
+    });
+  }
+
+  @override
+  Future<List<BookChapter>> getChapters(String bookId) async {
+    final query = _db.select(_db.bookChapters)
+      ..where((c) => c.bookId.equals(bookId))
+      ..orderBy([(c) => OrderingTerm.asc(c.position)]);
+    final rows = await query.get();
+    return rows.map(_chapterToDomain).toList();
   }
 
   @override
@@ -90,6 +115,7 @@ class DriftBookRepository implements BookRepository {
       :description,
       :language,
       :pageCount,
+      :coverImagePath,
     ) = row;
     return Book(
       id: id,
@@ -115,6 +141,7 @@ class DriftBookRepository implements BookRepository {
       description: description,
       language: language,
       pageCount: pageCount,
+      coverImagePath: coverImagePath,
     );
   }
 
@@ -143,6 +170,7 @@ class DriftBookRepository implements BookRepository {
       :description,
       :language,
       :pageCount,
+      :coverImagePath,
     ) = book;
     return BooksCompanion(
       id: Value(id),
@@ -168,6 +196,45 @@ class DriftBookRepository implements BookRepository {
       description: Value(description),
       language: Value(language),
       pageCount: Value(pageCount),
+      coverImagePath: Value(coverImagePath),
+    );
+  }
+
+  BookChapter _chapterToDomain(BookChapterRow row) {
+    final BookChapterRow(
+      :id,
+      :bookId,
+      :position,
+      filePath: chapterPath,
+      :title,
+      :duration,
+    ) = row;
+    return BookChapter(
+      id: id,
+      bookId: bookId,
+      position: position,
+      filePath: chapterPath,
+      title: title,
+      duration: duration,
+    );
+  }
+
+  BookChaptersCompanion _chapterToCompanion(BookChapter chapter) {
+    final BookChapter(
+      :id,
+      :bookId,
+      :position,
+      filePath: chapterPath,
+      :title,
+      :duration,
+    ) = chapter;
+    return BookChaptersCompanion(
+      id: Value(id),
+      bookId: Value(bookId),
+      position: Value(position),
+      filePath: Value(chapterPath),
+      title: Value(title),
+      duration: Value(duration),
     );
   }
 }
