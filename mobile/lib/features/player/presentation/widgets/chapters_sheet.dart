@@ -31,7 +31,7 @@ class ChaptersSheet extends ConsumerWidget {
                 children: [
                   const _SheetHandle(),
                   const Gap(18),
-                  _SheetHeader(count: state.chapters.length),
+                  const _SheetHeader(),
                   const Gap(12),
                   Expanded(
                     child: ListView.separated(
@@ -83,42 +83,24 @@ class _SheetHandle extends StatelessWidget {
 }
 
 class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({required this.count});
-
-  final int count;
+  const _SheetHeader();
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:textPrimary, :textTertiary) = context.appColors;
-    return Row(
-      children: [
-        IconButton(
-          tooltip: 'Закрыть',
-          onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(Icons.arrow_back, color: textPrimary),
+    final textPrimary = context.appColors.textPrimary;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        'Оглавление',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: textPrimary,
+          fontSize: 26,
+          fontWeight: FontWeight.w800,
+          height: 1.1,
         ),
-        Expanded(
-          child: Text(
-            'Оглавление',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: textPrimary,
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              height: 1.1,
-            ),
-          ),
-        ),
-        Text(
-          '$count',
-          style: TextStyle(
-            color: textTertiary,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

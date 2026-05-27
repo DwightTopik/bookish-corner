@@ -38,7 +38,7 @@ class PlayerTransport extends StatelessWidget {
             size: AppDimensions.playerSkipButtonSize,
           ),
         ),
-        const Gap(AppDimensions.smallGap),
+        const Gap(AppDimensions.playerControlsHGap),
         SeekButton(
           seconds: -15,
           onTap: onBack,
@@ -64,7 +64,7 @@ class PlayerTransport extends StatelessWidget {
           onTap: onForward,
           size: AppDimensions.playerSeekButtonSize,
         ),
-        const Gap(AppDimensions.smallGap),
+        const Gap(AppDimensions.playerControlsHGap),
         IconButton(
           tooltip: 'Следующая глава',
           onPressed: onNext,

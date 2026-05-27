@@ -12,6 +12,7 @@ class HorizontalPicker<T> extends StatefulWidget {
     required this.labelFor,
     required this.initialIndex,
     required this.onSettled,
+    this.onChanged,
     this.settleDelay = const Duration(seconds: 2),
   });
 
@@ -19,6 +20,7 @@ class HorizontalPicker<T> extends StatefulWidget {
   final String Function(T value) labelFor;
   final int initialIndex;
   final void Function(T value) onSettled;
+  final void Function(T value)? onChanged;
   final Duration settleDelay;
 
   @override
@@ -67,6 +69,7 @@ class _HorizontalPickerState<T> extends State<HorizontalPicker<T>> {
             itemCount: widget.values.length,
             onPageChanged: (i) {
               setState(() => _selected = i);
+              widget.onChanged?.call(widget.values[i]);
               _scheduleSettle();
             },
             itemBuilder: (context, index) {

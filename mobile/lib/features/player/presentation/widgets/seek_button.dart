@@ -21,33 +21,30 @@ class SeekButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = iconColor ?? context.appColors.textPrimary;
-    return IconButton(
-      onPressed: onTap,
-      icon: SizedBox.square(
-        dimension: size,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(
-              _isForward ? Icons.refresh : Icons.refresh,
-              size: size,
+
+    final icon = Transform.scale(
+      scaleX: _isForward ? -1.0 : 1.0,
+      child: Icon(Icons.replay, color: color, size: size),
+    );
+
+    return InkResponse(
+      onTap: onTap,
+      radius: size * 0.8,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 2,
+        children: [
+          icon,
+          Text(
+            '${seconds.abs()}',
+            style: TextStyle(
               color: color,
-              textDirection: _isForward ? TextDirection.ltr : TextDirection.rtl,
+              fontSize: size * 0.36,
+              fontWeight: FontWeight.w600,
+              height: 1,
             ),
-            Padding(
-              padding: const .only(top: 4),
-              child: Text(
-                seconds.abs().toString(),
-                style: TextStyle(
-                  color: color,
-                  fontSize: size * 0.32,
-                  fontWeight: FontWeight.w600,
-                  height: 1,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

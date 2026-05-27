@@ -96,8 +96,11 @@ class _PlayerViewState extends ConsumerState<_PlayerView> {
             children: [
               _PlayerHeader(bookTitle: bookTitle, bookAuthor: bookAuthor),
               const Spacer(),
-              Center(
-                child: CoverGlow(coverPath: coverImagePath, size: coverSize),
+              SizedBox(
+                height: coverSize,
+                child: Center(
+                  child: CoverGlow(coverPath: coverImagePath, size: coverSize),
+                ),
               ),
               const Gap(AppDimensions.playerBookProgressTopGap),
               _BookProgressSummary(
@@ -109,7 +112,7 @@ class _PlayerViewState extends ConsumerState<_PlayerView> {
                   });
                 },
               ),
-              const Gap(AppDimensions.playerBookProgressBottomGap),
+              const Gap(AppDimensions.playerChapterTitleTopGap),
               Text(
                 state.currentChapter?.title ?? bookTitle,
                 textAlign: TextAlign.center,

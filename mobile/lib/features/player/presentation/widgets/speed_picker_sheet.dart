@@ -23,6 +23,7 @@ class SpeedPickerSheet extends ConsumerWidget {
         values: values,
         initialIndex: initial < 0 ? 2 : initial,
         labelFor: _formatSpeed,
+        onChanged: (value) => ref.read(playerProvider.notifier).setSpeed(value),
         onSettled: (value) => ref.read(playerProvider.notifier).setSpeed(value),
       ),
     );
