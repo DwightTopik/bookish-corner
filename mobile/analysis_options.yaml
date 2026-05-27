@@ -10,6 +10,7 @@ plugins:
       use_bloc_suffix: false
       dispose_provided_instances: false
       prefer_overriding_parent_equality: false
+      prefer_immutable_bloc_state: false
 
 analyzer:
   errors:
