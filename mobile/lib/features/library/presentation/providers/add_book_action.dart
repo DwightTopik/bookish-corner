@@ -103,8 +103,9 @@ String? _resolveDirectoryPath(String uriOrPath) {
     if (colon < 0) return null;
     final volume = docId.substring(0, colon);
     final relative = docId.substring(colon + 1);
-    final root =
-        volume == 'primary' ? '/storage/emulated/0' : '/storage/$volume';
+    final root = volume == 'primary'
+        ? '/storage/emulated/0'
+        : '/storage/$volume';
     return relative.isEmpty ? root : '$root/$relative';
   } catch (_) {
     return null;
@@ -157,14 +158,16 @@ Future<void> pickAndAddFolder(
 
   List<File> audioFiles;
   try {
-    audioFiles = Directory(folderPath)
-        .listSync(recursive: false)
-        .whereType<File>()
-        .where(
-          (f) => _audioExtensions.contains(p.extension(f.path).toLowerCase()),
-        )
-        .toList()
-      ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+    audioFiles =
+        Directory(folderPath)
+            .listSync(recursive: false)
+            .whereType<File>()
+            .where(
+              (f) =>
+                  _audioExtensions.contains(p.extension(f.path).toLowerCase()),
+            )
+            .toList()
+          ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
   } catch (e) {
     dev.log('listSync error: $e', name: 'pickAndAddFolder');
     messenger.showSnackBar(
@@ -198,7 +201,9 @@ Future<void> pickAndAddFolder(
 
   Uint8List? coverBytes = embeddedCover;
   if (coverBytes == null) {
-    for (final f in Directory(folderPath).listSync(recursive: false).whereType<File>()) {
+    for (final f in Directory(
+      folderPath,
+    ).listSync(recursive: false).whereType<File>()) {
       if (_coverFileNames.contains(p.basename(f.path).toLowerCase())) {
         try {
           coverBytes = await f.readAsBytes();
@@ -229,7 +234,7 @@ Future<void> pickAndAddFolder(
       BookChapter(
         id: chapterUuid.v4(),
         bookId: id,
-        position: index + 1,
+        position: index,
         filePath: file.path,
       ),
   ];

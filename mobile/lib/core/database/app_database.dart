@@ -44,31 +44,50 @@ class BookChapters extends Table {
   TextColumn get filePath => text()();
   TextColumn get title => text().nullable()();
   IntColumn get duration => integer().nullable()();
+  IntColumn get startOffsetMs => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Books, BookChapters])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor])
-      : super(executor ?? driftDatabase(name: 'bookish'));
+@DataClassName('AudioProgressRow')
+class AudioProgress extends Table {
+  TextColumn get bookId =>
+      text().references(Books, #id, onDelete: KeyAction.cascade)();
+  IntColumn get chapterIndex => integer()();
+  IntColumn get positionMs => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
 
   @override
-  int get schemaVersion => 3;
+  Set<Column> get primaryKey => {bookId};
+}
+
+@DriftDatabase(tables: [Books, BookChapters, AudioProgress])
+class AppDatabase extends _$AppDatabase {
+  AppDatabase([QueryExecutor? executor])
+    : super(executor ?? driftDatabase(name: 'bookish'));
+
+  @override
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => .new(
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.addColumn(books, books.coverImagePath);
-          }
-          if (from < 3) {
-            await m.createTable(bookChapters);
-          }
-        },
-      );
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(books, books.coverImagePath);
+      }
+      if (from < 3) {
+        await m.createTable(bookChapters);
+      }
+      if (from < 4) {
+        await m.addColumn(bookChapters, bookChapters.startOffsetMs);
+      }
+      if (from < 5) {
+        await m.createTable(audioProgress);
+      }
+    },
+  );
 }

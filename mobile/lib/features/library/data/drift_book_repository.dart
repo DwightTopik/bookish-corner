@@ -21,7 +21,9 @@ class DriftBookRepository implements BookRepository {
   @override
   Stream<Book?> watchBookById(String id) {
     final query = _db.select(_db.books)..where((b) => b.id.equals(id));
-    return query.watchSingleOrNull().map((row) => row == null ? null : _toDomain(row));
+    return query.watchSingleOrNull().map(
+      (row) => row == null ? null : _toDomain(row),
+    );
   }
 
   @override
@@ -37,9 +39,7 @@ class DriftBookRepository implements BookRepository {
     await _db.transaction(() async {
       await _db.into(_db.books).insertOnConflictUpdate(_toCompanion(book));
       for (final chapter in chapters) {
-        await _db
-            .into(_db.bookChapters)
-            .insert(_chapterToCompanion(chapter));
+        await _db.into(_db.bookChapters).insert(_chapterToCompanion(chapter));
       }
     });
   }
@@ -51,6 +51,21 @@ class DriftBookRepository implements BookRepository {
       ..orderBy([(c) => OrderingTerm.asc(c.position)]);
     final rows = await query.get();
     return rows.map(_chapterToDomain).toList();
+  }
+
+  @override
+  Future<void> replaceChapters(
+    String bookId,
+    List<BookChapter> chapters,
+  ) async {
+    await _db.transaction(() async {
+      await (_db.delete(
+        _db.bookChapters,
+      )..where((c) => c.bookId.equals(bookId))).go();
+      for (final chapter in chapters) {
+        await _db.into(_db.bookChapters).insert(_chapterToCompanion(chapter));
+      }
+    });
   }
 
   @override
@@ -83,9 +98,7 @@ class DriftBookRepository implements BookRepository {
     await (_db.update(_db.books)..where((b) => b.id.equals(id))).write(
       BooksCompanion(
         readingStatus: Value(status.name),
-        finishedAt: Value(
-          status == .finished ? DateTime.now() : null,
-        ),
+        finishedAt: Value(status == .finished ? DateTime.now() : null),
       ),
     );
   }
@@ -208,6 +221,7 @@ class DriftBookRepository implements BookRepository {
       filePath: chapterPath,
       :title,
       :duration,
+      :startOffsetMs,
     ) = row;
     return BookChapter(
       id: id,
@@ -216,6 +230,7 @@ class DriftBookRepository implements BookRepository {
       filePath: chapterPath,
       title: title,
       duration: duration,
+      startOffsetMs: startOffsetMs,
     );
   }
 
@@ -227,6 +242,7 @@ class DriftBookRepository implements BookRepository {
       filePath: chapterPath,
       :title,
       :duration,
+      :startOffsetMs,
     ) = chapter;
     return BookChaptersCompanion(
       id: Value(id),
@@ -235,6 +251,7 @@ class DriftBookRepository implements BookRepository {
       filePath: Value(chapterPath),
       title: Value(title),
       duration: Value(duration),
+      startOffsetMs: Value(startOffsetMs),
     );
   }
 }

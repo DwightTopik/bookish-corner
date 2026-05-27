@@ -12,4 +12,5 @@ abstract class BookRepository {
   Future<void> updateProgress(String id, double progress, String? lastPosition);
   Future<void> updateStatus(String id, ReadingStatus status);
   Future<List<BookChapter>> getChapters(String bookId);
+  Future<void> replaceChapters(String bookId, List<BookChapter> chapters);
 }
