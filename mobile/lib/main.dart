@@ -9,6 +9,8 @@ Future<void> main() async {
     androidNotificationChannelId: 'bookish_corner.audio',
     androidNotificationChannelName: 'Audiobook playback',
     androidNotificationOngoing: true,
+    rewindInterval: const Duration(seconds: 15),
+    fastForwardInterval: const Duration(seconds: 30),
   );
   runApp(const ProviderScope(child: BookishApp()));
 }
