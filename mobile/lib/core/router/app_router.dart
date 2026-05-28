@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bookish_corner/app/scaffold_with_nav.dart';
 import 'package:bookish_corner/features/auth/presentation/screens/auth_screen.dart';
+import 'package:bookish_corner/features/book_details/presentation/screens/book_details_screen.dart';
 import 'package:bookish_corner/features/library/presentation/screens/library_screen.dart';
 import 'package:bookish_corner/features/player/presentation/screens/player_screen.dart';
 import 'package:bookish_corner/features/reader/presentation/screens/reader_screen.dart';
@@ -43,21 +44,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(
-        path: '/auth',
-        builder: (context, state) => const AuthScreen(),
-      ),
+      GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
       GoRoute(
         path: '/reader/:bookId',
-        builder: (context, state) => ReaderScreen(
-          bookId: state.pathParameters['bookId']!,
-        ),
+        builder: (context, state) =>
+            ReaderScreen(bookId: state.pathParameters['bookId']!),
+      ),
+      GoRoute(
+        path: '/books/:bookId/details',
+        builder: (context, state) =>
+            BookDetailsScreen(bookId: state.pathParameters['bookId']!),
       ),
       GoRoute(
         path: '/player/:bookId',
-        builder: (context, state) => PlayerScreen(
-          bookId: state.pathParameters['bookId']!,
-        ),
+        builder: (context, state) =>
+            PlayerScreen(bookId: state.pathParameters['bookId']!),
       ),
     ],
   );

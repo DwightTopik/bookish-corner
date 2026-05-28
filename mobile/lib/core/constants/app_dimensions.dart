@@ -31,4 +31,17 @@ class AppDimensions {
   static const double screenVPadding = 16;
   static const double sectionGap = 16;
   static const double smallGap = 8;
+
+  static const double bookDetailsCoverRatio = 0.64;
+  static const double bookDetailsCoverMinSize = 210;
+  static const double bookDetailsCoverMaxSize = 300;
+  static const double bookDetailsGlowScale = 1.55;
+  static const double bookDetailsGlowBlurSigma = 80;
+  static const double bookDetailsCoverRadius = 18;
+  static const double bookDetailsInfoButtonSize = 38;
+  static const double bookDetailsSectionGap = 26;
+  static const double bookDetailsChipRadius = 999;
+  static const double bookDetailsRecommendationCoverWidth = 78;
+  static const double bookDetailsRecommendationCoverHeight = 112;
+  static const double bookDetailsRecommendationWidth = 118;
 }

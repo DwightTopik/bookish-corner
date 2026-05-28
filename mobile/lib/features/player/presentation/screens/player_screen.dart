@@ -95,7 +95,11 @@ class _PlayerViewState extends ConsumerState<_PlayerView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _PlayerHeader(bookTitle: bookTitle, bookAuthor: bookAuthor),
+              _PlayerHeader(
+                bookId: book?.id,
+                bookTitle: bookTitle,
+                bookAuthor: bookAuthor,
+              ),
               const Spacer(),
               SizedBox(
                 height: coverSize,
@@ -270,14 +274,19 @@ class _BookProgressSummary extends StatelessWidget {
 }
 
 class _PlayerHeader extends StatelessWidget {
-  const _PlayerHeader({required this.bookTitle, required this.bookAuthor});
+  const _PlayerHeader({
+    required this.bookId,
+    required this.bookTitle,
+    required this.bookAuthor,
+  });
 
+  final String? bookId;
   final String bookTitle;
   final String bookAuthor;
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:textPrimary, :textSecondary, :textTertiary) =
+    final AppColors(:textPrimary, :textSecondary, :textTertiary, :elevated) =
         context.appColors;
     return Row(
       children: [
@@ -315,10 +324,21 @@ class _PlayerHeader extends StatelessWidget {
             ],
           ),
         ),
-        IconButton(
-          tooltip: 'Ещё',
-          onPressed: () {},
-          icon: Icon(Icons.more_vert, color: textSecondary),
+        SizedBox.square(
+          dimension: AppDimensions.bookDetailsInfoButtonSize,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: elevated.withValues(alpha: 0.68),
+            ),
+            child: IconButton(
+              tooltip: 'О книге',
+              onPressed: bookId == null
+                  ? null
+                  : () => context.push('/books/$bookId/details'),
+              icon: Icon(Icons.info_outline, color: textSecondary),
+            ),
+          ),
         ),
       ],
     );

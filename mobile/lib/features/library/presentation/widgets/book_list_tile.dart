@@ -29,9 +29,7 @@ class BookListTile extends ConsumerWidget {
       builder: (context) => AlertDialog(
         backgroundColor: elevated,
         title: const Text('Подтвердить удаление'),
-        content: const Text(
-          'Вы уверены, что хотите удалить выбранную книгу?',
-        ),
+        content: const Text('Вы уверены, что хотите удалить выбранную книгу?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -75,6 +73,14 @@ class BookListTile extends ConsumerWidget {
                 _BookCover(book: book),
                 const Gap(12),
                 Expanded(child: _BookInfo(book: book)),
+                IconButton(
+                  tooltip: 'О книге',
+                  onPressed: () => context.push('/books/${book.id}/details'),
+                  icon: Icon(
+                    Icons.info_outline,
+                    color: context.appColors.textTertiary,
+                  ),
+                ),
               ],
             ),
           ),
@@ -186,11 +192,7 @@ class _CoverPlaceholder extends StatelessWidget {
     final AppColors(:surface, :textTertiary) = context.appColors;
     return Container(
       color: surface,
-      child: Icon(
-        Icons.menu_book,
-        color: textTertiary,
-        size: 32,
-      ),
+      child: Icon(Icons.menu_book, color: textTertiary, size: 32),
     );
   }
 }
@@ -306,8 +308,7 @@ class _StatusRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors(:textPrimary, :accent) = context.appColors;
-    if (book.readingStatus == .reading &&
-        book.readingProgress > 0) {
+    if (book.readingStatus == .reading && book.readingProgress > 0) {
       final percent = (book.readingProgress * 100).round();
       final label = book.format.isAudio ? 'Слушать дальше' : 'Читать дальше';
       return Row(
