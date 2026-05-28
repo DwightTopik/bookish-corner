@@ -16,11 +16,12 @@ import 'package:bookish_corner/features/library/domain/book_chapter.dart';
 import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/library/utils/book_metadata_extractor.dart';
 
-Future<void> pickAndAddBook(WidgetRef ref) async {
+Future<void> pickAndAddBook(BuildContext context, WidgetRef ref) async {
   final result = await FilePicker.pickFiles(
     type: FileType.custom,
     allowedExtensions: BookFormat.pickerExtensions,
   );
+  if (!context.mounted) return;
   final pickedFile = result?.files.single;
   if (pickedFile == null || pickedFile.path == null) return;
   final PlatformFile(:path, :name, :size) = pickedFile;
@@ -31,6 +32,7 @@ Future<void> pickAndAddBook(WidgetRef ref) async {
   final id = const Uuid().v4();
   final extractor = ref.read(bookMetadataExtractorProvider);
   final meta = await extractor.extract(path, format);
+  if (!context.mounted) return;
   final ExtractedBookMetadata(
     title: metaTitle,
     author: metaAuthor,
@@ -65,6 +67,7 @@ Future<void> pickAndAddBook(WidgetRef ref) async {
     coverImagePath: coverPath,
   );
 
+  if (!context.mounted) return;
   await ref.read(bookRepositoryProvider).addBook(book);
 }
 
@@ -127,10 +130,12 @@ Future<bool> _requestAudioPermission() async {
 }
 
 Future<void> pickAndAddFolder(
+  BuildContext context,
   ScaffoldMessengerState messenger,
   WidgetRef ref,
 ) async {
   final rawPath = await FilePicker.getDirectoryPath();
+  if (!context.mounted) return;
   if (rawPath == null) return;
 
   dev.log('getDirectoryPath raw: $rawPath', name: 'pickAndAddFolder');
@@ -141,18 +146,23 @@ Future<void> pickAndAddFolder(
   dev.log('resolved path: $folderPath', name: 'pickAndAddFolder');
 
   if (folderPath == null) {
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Не удалось получить путь к папке')),
-    );
+    if (messenger.mounted) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Не удалось получить путь к папке')),
+      );
+    }
     return;
   }
 
   // Request storage/audio permission so dart:io can read external files.
   final permitted = await _requestAudioPermission();
+  if (!context.mounted) return;
   if (!permitted) {
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Нет разрешения на чтение аудиофайлов')),
-    );
+    if (messenger.mounted) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Нет разрешения на чтение аудиофайлов')),
+      );
+    }
     return;
   }
 
@@ -170,9 +180,11 @@ Future<void> pickAndAddFolder(
           ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
   } catch (e) {
     dev.log('listSync error: $e', name: 'pickAndAddFolder');
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Не удалось прочитать содержимое папки')),
-    );
+    if (messenger.mounted) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Не удалось прочитать содержимое папки')),
+      );
+    }
     return;
   }
 
@@ -180,9 +192,11 @@ Future<void> pickAndAddFolder(
   dev.log('audio files found: $length', name: 'pickAndAddFolder');
 
   if (isEmpty) {
-    messenger.showSnackBar(
-      const SnackBar(content: Text('В папке не найдено аудиофайлов')),
-    );
+    if (messenger.mounted) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('В папке не найдено аудиофайлов')),
+      );
+    }
     return;
   }
 
@@ -192,6 +206,7 @@ Future<void> pickAndAddFolder(
     first.path,
     folderPath: folderPath,
   );
+  if (!context.mounted) return;
   final ExtractedBookMetadata(
     title: metaTitle,
     author: metaAuthor,
@@ -250,5 +265,6 @@ Future<void> pickAndAddFolder(
     coverImagePath: coverPath,
   );
 
+  if (!context.mounted) return;
   await ref.read(bookRepositoryProvider).addBookWithChapters(book, chapters);
 }

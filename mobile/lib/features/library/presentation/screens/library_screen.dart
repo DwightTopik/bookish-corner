@@ -34,6 +34,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     setState(() => _isSearching = false);
   }
 
+  void _pickAndAddBook() {
+    pickAndAddBook(context, ref);
+  }
+
+  void _pickAndAddFolder(ScaffoldMessengerState messenger) {
+    pickAndAddFolder(context, messenger, ref);
+  }
+
   void _showAddOptions(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -41,12 +49,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       builder: (sheetCtx) => _AddBookSheet(
         onAddBook: () {
           Navigator.of(sheetCtx).pop();
-          pickAndAddBook(ref);
+          _pickAndAddBook();
         },
         onAddFolder: () {
           final messenger = ScaffoldMessenger.of(sheetCtx);
           Navigator.of(sheetCtx).pop();
-          pickAndAddFolder(messenger, ref);
+          _pickAndAddFolder(messenger);
         },
       ),
     );

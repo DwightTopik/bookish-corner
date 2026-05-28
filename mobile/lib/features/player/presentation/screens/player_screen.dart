@@ -46,6 +46,7 @@ class PlayerScreen extends ConsumerWidget {
         }
         if (playerState.book?.id != book.id && !playerState.loading) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
             ref.read(playerProvider.notifier).loadBook(book);
           });
         }

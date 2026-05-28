@@ -43,6 +43,7 @@ class BookListTile extends ConsumerWidget {
         ],
       ),
     );
+    if (!context.mounted) return;
     if (confirmed ?? false) {
       await ref.read(bookRepositoryProvider).deleteBook(book.id);
       final coverPath = book.coverImagePath;
