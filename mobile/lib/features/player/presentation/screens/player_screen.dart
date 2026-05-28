@@ -176,6 +176,99 @@ class _PlayerViewState extends ConsumerState<_PlayerView> {
   }
 }
 
+class _BookProgressSummary extends StatelessWidget {
+  const _BookProgressSummary({
+    required this.state,
+    required this.showPercent,
+    required this.onTap,
+  });
+
+  final PlayerState state;
+  final bool showPercent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors(:textSecondary, :elevated, :accent) = context.appColors;
+    final label = showPercent ? _percentLabel() : _remainingLabel();
+
+    return Center(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: const .all(.circular(999)),
+            color: elevated.withValues(alpha: 0.14),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.16),
+                blurRadius: 36,
+                spreadRadius: 4,
+                offset: const Offset(0, -14),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const .symmetric(
+              horizontal: AppDimensions.playerBookProgressHPadding,
+              vertical: AppDimensions.playerBookProgressVPadding,
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textSecondary.withValues(alpha: 0.74),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _remainingLabel() {
+    final total = state.totalDuration;
+    if (total <= .zero) return 'Время до конца книги';
+    final remaining = total - _bookPosition();
+    return '${_formatHumanDuration(remaining.isNegative ? .zero : remaining)} до конца книги';
+  }
+
+  String _percentLabel() {
+    final totalMs = state.totalDuration.inMilliseconds;
+    if (totalMs <= 0) return '0% от всей книги';
+    final listenedMs = _bookPosition().inMilliseconds.clamp(0, totalMs);
+    final percent = (listenedMs / totalMs * 100).round().clamp(0, 100);
+    return '$percent% от всей книги';
+  }
+
+  Duration _bookPosition() {
+    int playedMs = state.position.inMilliseconds;
+    for (int i = 0; i < state.chapterIndex && i < state.chapters.length; i++) {
+      playedMs += state.chapters[i].durationMs;
+    }
+    return Duration(milliseconds: playedMs);
+  }
+
+  String _formatHumanDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    if (hours > 0) {
+      return '$hours ч ${minutes.toString().padLeft(2, '0')} мин';
+    }
+    return '$minutes мин';
+  }
+}
+
 class _PlayerHeader extends StatelessWidget {
   const _PlayerHeader({required this.bookTitle, required this.bookAuthor});
 
