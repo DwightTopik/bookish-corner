@@ -38,6 +38,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   Timer? _sleepTimer;
   Timer? _sleepTickTimer;
   bool _endOfChapterPending = false;
+  bool _sleepPaused = false;
 
   ChapterResolver get _resolver => ref.read(chapterResolverProvider);
   AudioProgressRepository get _progressRepo =>
@@ -257,18 +258,32 @@ class PlayerNotifier extends Notifier<PlayerState> {
     final chapters = state.chapters;
     if (chapters.isEmpty) return;
     if (_isSingleSource(chapters)) {
+      final currentIndex = state.chapterIndex.clamp(0, chapters.length - 1);
+      if (_endOfChapterPending &&
+          _hasReachedSingleSourceChapterEnd(p, currentIndex, chapters)) {
+        final current = chapters[currentIndex];
+        final rel = _clampDuration(p - current.start, current.duration);
+        state = state.copyWith(chapterIndex: currentIndex, position: rel);
+        _triggerSleepAtChapterEnd();
+        return;
+      }
       final idx = _findChapterAt(p, chapters);
       final rel = p - chapters[idx].start;
       final wasChapter = state.chapterIndex;
       state = state.copyWith(
         chapterIndex: idx,
-        position: rel.isNegative ? .zero : rel,
+        position: _clampDuration(rel, chapters[idx].duration),
       );
       if (_endOfChapterPending && idx != wasChapter) {
         _triggerSleepAtChapterEnd();
       }
     } else {
-      state = state.copyWith(position: p);
+      final duration = state.chapterDuration;
+      final position = duration > .zero ? _clampDuration(p, duration) : p;
+      state = state.copyWith(position: position);
+      if (_endOfChapterPending && duration > .zero && p >= duration) {
+        _triggerSleepAtChapterEnd();
+      }
     }
   }
 
@@ -276,11 +291,49 @@ class PlayerNotifier extends Notifier<PlayerState> {
     if (!ref.mounted || !_isReady || duration == null || duration <= .zero) {
       return;
     }
+    if (_syncSingleSourceFinalDuration(duration)) return;
     if (!_canUsePlayerDuration(state.chapters)) {
       state = state.copyWith(clearChapterDurationOverride: true);
       return;
     }
     state = state.withCurrentChapterDuration(duration);
+  }
+
+  bool _syncSingleSourceFinalDuration(Duration sourceDuration) {
+    final chapters = state.chapters;
+    if (!_isSingleSource(chapters) || chapters.length <= 1) return false;
+    final totalMs = sourceDuration.inMilliseconds;
+    final last = chapters.last;
+    final correctedMs = totalMs - last.startOffsetMs;
+    if (correctedMs <= 0 || correctedMs == last.durationMs) {
+      state = state.copyWith(clearChapterDurationOverride: true);
+      return true;
+    }
+    final updated = [...chapters];
+    updated[updated.length - 1] = last.copyWith(durationMs: correctedMs);
+    state = state.copyWith(
+      chapters: updated,
+      clearChapterDurationOverride: true,
+    );
+    return true;
+  }
+
+  bool _hasReachedSingleSourceChapterEnd(
+    Duration absolutePosition,
+    int index,
+    List<AudioChapter> chapters,
+  ) {
+    final chapter = chapters[index];
+    final end = index + 1 < chapters.length
+        ? chapters[index + 1].start
+        : chapter.start + chapter.duration;
+    return end > chapter.start && absolutePosition >= end;
+  }
+
+  Duration _clampDuration(Duration value, Duration max) {
+    if (value.isNegative) return .zero;
+    if (max > .zero && value > max) return max;
+    return value;
   }
 
   int _findChapterAt(Duration p, List<AudioChapter> chapters) {
@@ -299,10 +352,27 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
   void _onPlayerState(ja.PlayerState ps) {
     if (!ref.mounted) return;
-    state = state.copyWith(playing: ps.playing);
-    if (ps.processingState == .completed) {
-      _saveProgress();
+    if (_sleepPaused && ps.playing) {
+      _player?.pause();
+      return;
     }
+    if (ps.processingState == .completed) {
+      state = _completedState();
+      _saveProgress();
+      return;
+    }
+    state = state.copyWith(playing: ps.playing);
+  }
+
+  PlayerState _completedState() {
+    final chapters = state.chapters;
+    if (chapters.isEmpty) return state.copyWith(playing: false);
+    final lastIndex = chapters.length - 1;
+    return state.copyWith(
+      chapterIndex: lastIndex,
+      position: chapters[lastIndex].duration,
+      playing: false,
+    );
   }
 
   void _onIndex(int? index) {
@@ -310,7 +380,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
     if (_isSingleSource(state.chapters)) return;
     final clamped = index.clamp(0, state.chapters.length - 1);
     final was = state.chapterIndex;
-    state = state.copyWith(chapterIndex: clamped);
+    state = state.copyWith(
+      chapterIndex: clamped,
+      position: clamped != was ? .zero : state.position,
+    );
     final duration = _player?.duration;
     if (_canUsePlayerDuration(state.chapters) &&
         duration != null &&
@@ -328,6 +401,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
   Future<void> play() async {
     if (!_isReady) return;
+    _sleepPaused = false;
     await _player!.play();
   }
 
@@ -436,12 +510,15 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
   void _captureCurrentDuration() {
     Future<void>.delayed(const Duration(milliseconds: 80), () {
-      if (!ref.mounted || !_isReady || !_canUsePlayerDuration(state.chapters)) {
+      if (!ref.mounted || !_isReady) {
         return;
       }
       final duration = _player?.duration;
       if (duration != null && duration > .zero) {
-        state = state.withCurrentChapterDuration(duration);
+        if (_syncSingleSourceFinalDuration(duration)) return;
+        if (_canUsePlayerDuration(state.chapters)) {
+          state = state.withCurrentChapterDuration(duration);
+        }
       }
     });
   }
@@ -472,14 +549,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
         state = state.copyWith(sleepTimer: option, sleepRemaining: duration);
         _sleepTimer = Timer(duration, () async {
           if (!ref.mounted) return;
-          await pause();
-          if (!ref.mounted) return;
-          _sleepTimer = null;
-          _sleepTickTimer?.cancel();
-          state = state.copyWith(
-            sleepTimer: const SleepTimerOff(),
-            clearSleepRemaining: true,
-          );
+          await _pauseForSleepTimer();
         });
         _sleepTickTimer = Timer.periodic(const Duration(seconds: 1), (_) {
           if (!ref.mounted) return;
@@ -509,13 +579,23 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
   Future<void> _triggerSleepAtChapterEnd() async {
     _endOfChapterPending = false;
+    await _pauseForSleepTimer();
+  }
+
+  Future<void> _pauseForSleepTimer() async {
+    _sleepPaused = true;
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
     _sleepTickTimer?.cancel();
-    await pause();
+    _endOfChapterPending = false;
+    await _player?.pause();
     if (!ref.mounted) return;
     state = state.copyWith(
+      playing: false,
       sleepTimer: const SleepTimerOff(),
       clearSleepRemaining: true,
     );
+    await _saveProgress();
   }
 
   Future<void> toggleBookmark() async {
@@ -556,6 +636,8 @@ class PlayerNotifier extends Notifier<PlayerState> {
   Future<void> _saveProgress() async {
     final book = state.book;
     if (book == null || state.chapters.isEmpty) return;
+    final positionLabel =
+        '${state.chapterIndex}:${state.position.inMilliseconds}';
     await _progressRepo.saveProgress(
       AudioProgress(
         bookId: book.id,
@@ -564,6 +646,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
         updatedAt: DateTime.now(),
       ),
     );
+    await _bookRepo.updateProgress(book.id, _progressFraction(), positionLabel);
   }
 
   Future<void> _dispose() async {

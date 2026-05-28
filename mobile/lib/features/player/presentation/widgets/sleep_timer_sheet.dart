@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
 import 'package:bookish_corner/features/player/domain/sleep_timer_option.dart';
 import 'package:bookish_corner/features/player/presentation/providers/player_providers.dart';
+import 'package:bookish_corner/features/player/presentation/providers/player_state.dart';
 import 'package:bookish_corner/features/player/presentation/widgets/horizontal_picker.dart';
 
 class SleepTimerSheet extends ConsumerWidget {
@@ -37,7 +38,8 @@ class SleepTimerSheet extends ConsumerWidget {
               HorizontalPicker<SleepTimerOption>(
                 values: sleepTimerPresets,
                 initialIndex: initial,
-                labelFor: (value) => value.label,
+                labelFor: (value) => _labelFor(value, state),
+                settleDelay: const Duration(milliseconds: 250),
                 onSettled: (value) {
                   ref.read(playerProvider.notifier).setSleepTimer(value);
                 },
@@ -60,6 +62,29 @@ class SleepTimerSheet extends ConsumerWidget {
       }
     }
     return 0;
+  }
+
+  String _labelFor(SleepTimerOption value, PlayerState state) {
+    final remaining = state.sleepRemaining;
+    if (remaining != null && _sameOption(value, state.sleepTimer)) {
+      return _format(remaining);
+    }
+    return value.label;
+  }
+
+  bool _sameOption(SleepTimerOption a, SleepTimerOption b) {
+    if (a.runtimeType != b.runtimeType) return false;
+    if (a is SleepTimerDuration && b is SleepTimerDuration) {
+      return a.duration == b.duration;
+    }
+    return true;
+  }
+
+  String _format(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (duration.inHours > 0) return '${duration.inHours}:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 }
 

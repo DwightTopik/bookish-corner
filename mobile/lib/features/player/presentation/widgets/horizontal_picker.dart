@@ -49,6 +49,18 @@ class _HorizontalPickerState<T> extends State<HorizontalPicker<T>> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant HorizontalPicker<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = widget.initialIndex.clamp(0, widget.values.length - 1);
+    if (next == _selected || next == oldWidget.initialIndex) return;
+    _settleTimer?.cancel();
+    _selected = next;
+    if (_controller.hasClients) {
+      _controller.jumpToPage(next);
+    }
+  }
+
   void _scheduleSettle() {
     _settleTimer?.cancel();
     _settleTimer = Timer(widget.settleDelay, () {
@@ -89,12 +101,22 @@ class _HorizontalPickerState<T> extends State<HorizontalPicker<T>> {
                           (1 - delta);
                   final color = Color.lerp(textPrimary, textTertiary, delta)!;
                   return Center(
-                    child: Text(
-                      widget.labelFor(widget.values[index]),
-                      style: TextStyle(
-                        color: color,
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.w600,
+                    child: Padding(
+                      padding: const .symmetric(horizontal: 4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: Text(
+                          widget.labelFor(widget.values[index]),
+                          maxLines: 1,
+                          softWrap: false,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   );
