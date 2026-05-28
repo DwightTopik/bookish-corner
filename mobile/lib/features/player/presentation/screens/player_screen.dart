@@ -220,7 +220,6 @@ class _BookProgressSummary extends StatelessWidget {
               switchOutCurve: Curves.easeInCubic,
               child: Text(
                 label,
-                key: ValueKey(label),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

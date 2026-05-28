@@ -28,13 +28,12 @@ class LibraryFilterState {
     FormatFilter? format,
     Set<ReadingStatus>? statuses,
     Set<String>? authors,
-  }) =>
-      .new(
-        query: query ?? this.query,
-        format: format ?? this.format,
-        statuses: statuses ?? this.statuses,
-        authors: authors ?? this.authors,
-      );
+  }) => .new(
+    query: query ?? this.query,
+    format: format ?? this.format,
+    statuses: statuses ?? this.statuses,
+    authors: authors ?? this.authors,
+  );
 }
 
 class LibraryFilterNotifier extends Notifier<LibraryFilterState> {
@@ -47,24 +46,23 @@ class LibraryFilterNotifier extends Notifier<LibraryFilterState> {
     required FormatFilter format,
     required Set<ReadingStatus> statuses,
     required Set<String> authors,
-  }) =>
-      state = state.copyWith(
-        format: format,
-        statuses: statuses,
-        authors: authors,
-      );
+  }) => state = state.copyWith(
+    format: format,
+    statuses: statuses,
+    authors: authors,
+  );
 
   void resetFilters() => state = state.copyWith(
-        format: .all,
-        statuses: const {},
-        authors: const {},
-      );
+    format: .all,
+    statuses: const {},
+    authors: const {},
+  );
 }
 
 final libraryFilterProvider =
     NotifierProvider<LibraryFilterNotifier, LibraryFilterState>(
-  LibraryFilterNotifier.new,
-);
+      LibraryFilterNotifier.new,
+    );
 
 final booksStreamProvider = StreamProvider<List<Book>>((ref) {
   return ref.watch(bookRepositoryProvider).watchAllBooks();
@@ -98,7 +96,9 @@ List<Book> _applyFilter(List<Book> books, LibraryFilterState filter) {
   };
 
   if (statuses.isNotEmpty) {
-    result = result.where((b) => statuses.contains(b.readingStatus)).toList();
+    result = result
+        .where((b) => statuses.contains(_effectiveStatus(b)))
+        .toList();
   }
 
   if (authors.isNotEmpty) {
@@ -106,4 +106,11 @@ List<Book> _applyFilter(List<Book> books, LibraryFilterState filter) {
   }
 
   return result;
+}
+
+ReadingStatus _effectiveStatus(Book book) {
+  final progress = book.readingProgress;
+  if (progress >= 1) return .finished;
+  if (progress > 0) return .reading;
+  return .notStarted;
 }
