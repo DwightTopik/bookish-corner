@@ -44,8 +44,8 @@ class PlayerBottomBar extends StatelessWidget {
             onTap: onSpeed,
           ),
           _BarAction(
-            icon: state.bookmarked ? Icons.bookmark : Icons.bookmark_border,
-            label: 'Метка',
+            icon: Icons.bookmarks_outlined,
+            label: 'Закладки',
             onTap: onBookmark,
           ),
         ],

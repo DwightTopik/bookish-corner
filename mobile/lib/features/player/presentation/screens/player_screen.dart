@@ -8,6 +8,7 @@ import 'package:bookish_corner/core/theme/app_colors.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/player/presentation/providers/player_providers.dart';
 import 'package:bookish_corner/features/player/presentation/providers/player_state.dart';
+import 'package:bookish_corner/features/player/presentation/widgets/bookmarks_sheet.dart';
 import 'package:bookish_corner/features/player/presentation/widgets/chapters_sheet.dart';
 import 'package:bookish_corner/features/player/presentation/widgets/cover_glow.dart';
 import 'package:bookish_corner/features/player/presentation/widgets/player_bottom_bar.dart';
@@ -152,8 +153,7 @@ class _PlayerViewState extends ConsumerState<_PlayerView> {
                 onChapters: () => _showSheet(context, const ChaptersSheet()),
                 onSleep: () => _showSheet(context, const SleepTimerSheet()),
                 onSpeed: () => _showSheet(context, const SpeedPickerSheet()),
-                onBookmark: () =>
-                    ref.read(playerProvider.notifier).toggleBookmark(),
+                onBookmark: () => _showSheet(context, const BookmarksSheet()),
               ),
             ],
           ),

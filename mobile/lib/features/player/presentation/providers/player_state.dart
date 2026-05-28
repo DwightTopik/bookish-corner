@@ -12,7 +12,6 @@ class PlayerState {
     this.speed = 1.0,
     this.sleepTimer = const SleepTimerOff(),
     this.sleepRemaining,
-    this.bookmarked = false,
     this.loading = false,
     this.chapterDurationOverride,
   });
@@ -25,7 +24,6 @@ class PlayerState {
   final double speed;
   final SleepTimerOption sleepTimer;
   final Duration? sleepRemaining;
-  final bool bookmarked;
   final bool loading;
   final Duration? chapterDurationOverride;
 
@@ -64,7 +62,6 @@ class PlayerState {
     SleepTimerOption? sleepTimer,
     Duration? sleepRemaining,
     bool clearSleepRemaining = false,
-    bool? bookmarked,
     bool? loading,
     Duration? chapterDurationOverride,
     bool clearChapterDurationOverride = false,
@@ -80,7 +77,6 @@ class PlayerState {
       sleepRemaining: clearSleepRemaining
           ? null
           : (sleepRemaining ?? this.sleepRemaining),
-      bookmarked: bookmarked ?? this.bookmarked,
       loading: loading ?? this.loading,
       chapterDurationOverride: clearChapterDurationOverride
           ? null
