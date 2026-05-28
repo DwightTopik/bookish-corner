@@ -62,13 +62,29 @@ class AudioProgress extends Table {
   Set<Column> get primaryKey => {bookId};
 }
 
-@DriftDatabase(tables: [Books, BookChapters, AudioProgress])
+@DataClassName('AudioBookmarkRow')
+class AudioBookmarks extends Table {
+  TextColumn get id => text()();
+  TextColumn get bookId =>
+      text().references(Books, #id, onDelete: KeyAction.cascade)();
+  IntColumn get chapterIndex => integer()();
+  IntColumn get positionMs => integer()();
+  TextColumn get title => text()();
+  TextColumn get chapterTitle => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Books, BookChapters, AudioProgress, AudioBookmarks])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
     : super(executor ?? driftDatabase(name: 'bookish'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => .new(
@@ -87,6 +103,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) {
         await m.createTable(audioProgress);
+      }
+      if (from < 6) {
+        await m.createTable(audioBookmarks);
       }
     },
   );

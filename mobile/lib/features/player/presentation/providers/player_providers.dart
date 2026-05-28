@@ -11,6 +11,7 @@ import 'package:bookish_corner/core/di/repository_providers.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/library/domain/book_chapter.dart';
 import 'package:bookish_corner/features/library/domain/book_repository.dart';
+import 'package:bookish_corner/features/player/domain/audio_bookmark.dart';
 import 'package:bookish_corner/features/player/domain/audio_chapter.dart';
 import 'package:bookish_corner/features/player/domain/audio_progress.dart';
 import 'package:bookish_corner/features/player/domain/audio_progress_repository.dart';
@@ -25,6 +26,11 @@ final playerProvider = NotifierProvider<PlayerNotifier, PlayerState>(
 final playerBookProvider = StreamProvider.family<Book?, String>((ref, bookId) {
   return ref.watch(bookRepositoryProvider).watchBookById(bookId);
 });
+
+final audioBookmarksProvider =
+    StreamProvider.family<List<AudioBookmark>, String>((ref, bookId) {
+      return ref.watch(audioBookmarkRepositoryProvider).watchBookmarks(bookId);
+    });
 
 class PlayerNotifier extends Notifier<PlayerState> {
   static const _resumePreroll = Duration(seconds: 2);
@@ -422,12 +428,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
   Future<void> seekTo(Duration position) async {
     if (!_isReady) return;
-    final chapter = state.currentChapter!;
-    if (_isSingleSource(state.chapters)) {
-      await _player!.seek(chapter.start + position);
-    } else {
-      await _player!.seek(position, index: state.chapterIndex);
-    }
+    await _seekToChapterPosition(state.chapterIndex, position);
   }
 
   Future<void> seekBy(Duration delta) async {
@@ -492,20 +493,38 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
   Future<void> jumpToChapter(int index) async {
     if (!_isReady) return;
+    await _seekToChapterPosition(index, .zero);
+  }
+
+  Future<void> seekToBookmark(AudioBookmark bookmark) async {
+    if (!_isReady) return;
+    await _seekToChapterPosition(bookmark.chapterIndex, bookmark.position);
+  }
+
+  Future<void> _seekToChapterPosition(
+    int chapterIndex,
+    Duration position,
+  ) async {
     final chapters = state.chapters;
-    final clamped = index.clamp(0, chapters.length - 1);
+    if (_player == null || chapters.isEmpty) return;
+    final clamped = chapterIndex.clamp(0, chapters.length - 1);
+    final chapter = chapters[clamped];
+    final target = _clampDuration(position, chapter.duration);
     if (_isSingleSource(chapters)) {
-      await _player!.seek(chapters[clamped].start);
+      await _player!.seek(chapter.start + target);
     } else {
-      await _player!.seek(.zero, index: clamped);
+      await _player!.seek(target, index: clamped);
     }
     if (!ref.mounted) return;
+    final changedChapter = clamped != state.chapterIndex;
     state = state.copyWith(
       chapterIndex: clamped,
-      position: .zero,
-      clearChapterDurationOverride: true,
+      position: target,
+      clearChapterDurationOverride: changedChapter,
     );
-    _captureCurrentDuration();
+    if (changedChapter) {
+      _captureCurrentDuration();
+    }
   }
 
   void _captureCurrentDuration() {
@@ -596,20 +615,6 @@ class PlayerNotifier extends Notifier<PlayerState> {
       clearSleepRemaining: true,
     );
     await _saveProgress();
-  }
-
-  Future<void> toggleBookmark() async {
-    final book = state.book;
-    if (book == null) return;
-    final bookmarked = !state.bookmarked;
-    state = state.copyWith(bookmarked: bookmarked);
-    final positionLabel =
-        '${state.chapterIndex}:${state.position.inMilliseconds}';
-    await _bookRepo.updateProgress(
-      book.id,
-      _progressFraction(),
-      bookmarked ? positionLabel : null,
-    );
   }
 
   double _progressFraction() {

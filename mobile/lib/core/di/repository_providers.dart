@@ -9,7 +9,9 @@ import 'package:bookish_corner/features/player/data/chapter_resolvers/filename_c
 import 'package:bookish_corner/features/player/data/chapter_resolvers/id3_chapter_resolver.dart';
 import 'package:bookish_corner/features/player/data/chapter_resolvers/m4b_chapter_resolver.dart';
 import 'package:bookish_corner/features/player/data/chapter_resolvers/single_file_chapter_resolver.dart';
+import 'package:bookish_corner/features/player/data/drift_audio_bookmark_repository.dart';
 import 'package:bookish_corner/features/player/data/drift_audio_progress_repository.dart';
+import 'package:bookish_corner/features/player/domain/audio_bookmark_repository.dart';
 import 'package:bookish_corner/features/player/domain/audio_progress_repository.dart';
 import 'package:bookish_corner/features/player/domain/chapter_resolver.dart';
 
@@ -25,6 +27,12 @@ final audioProgressRepositoryProvider = Provider<AudioProgressRepository>((
   ref,
 ) {
   return DriftAudioProgressRepository(ref.watch(appDatabaseProvider));
+});
+
+final audioBookmarkRepositoryProvider = Provider<AudioBookmarkRepository>((
+  ref,
+) {
+  return DriftAudioBookmarkRepository(ref.watch(appDatabaseProvider));
 });
 
 final chapterResolverProvider = Provider<ChapterResolver>((ref) {
