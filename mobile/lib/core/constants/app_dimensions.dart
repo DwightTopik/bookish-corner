@@ -27,6 +27,20 @@ class AppDimensions {
   static const double sheetPickerNeighborFont = 16;
   static const double sheetPickerViewportFraction = 0.28;
 
+  static const double readerZoneLeftFraction = 0.30;
+  static const double readerZoneCenterFraction = 0.40;
+  static const double readerZoneRightFraction = 0.30;
+  static const double readerSwipeVelocityThreshold = 200;
+  static const int readerChromeAnimMs = 220;
+  static const double readerToolbarHeight = 64;
+  static const double readerToolbarIconSize = 22;
+  static const double readerPanelHPadding = 20;
+  static const double readerPanelVPadding = 14;
+  static const double readerPanelRowGap = 14;
+  static const double readerContentHPadding = 24;
+  static const double readerContentVPadding = 16;
+  static const double readerImmersiveFooterBottomGap = 12;
+
   static const double screenHPadding = 20;
   static const double screenVPadding = 16;
   static const double sectionGap = 16;

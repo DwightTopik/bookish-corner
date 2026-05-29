@@ -13,6 +13,11 @@ class NavHistory {
 
   bool get canGoBack => entries.isNotEmpty;
 
+  /// Возможна ли навигация «вперёд» (redo). Стаб под D6 — пока всегда `false`;
+  /// существует, чтобы chrome (B2) связал кнопку «Вперёд» сейчас, а D6 наполнил
+  /// логику без изменения формы модели.
+  bool get canGoForward => false;
+
   NavHistory push(ReaderLocator locator) => .new(entries: [...entries, locator]);
 
   NavHistory pop() => entries.isEmpty
