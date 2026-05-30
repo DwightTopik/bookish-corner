@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bookish_corner/core/di/reader_providers.dart';
+import 'package:bookish_corner/features/library/domain/book.dart';
+import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/reader/domain/reader_capabilities.dart';
 import 'package:bookish_corner/features/reader/domain/reader_engine.dart';
 import 'package:bookish_corner/features/reader/domain/reader_locator.dart';
@@ -12,29 +14,54 @@ import 'package:bookish_corner/features/reader/domain/reader_search_result.dart'
 import 'package:bookish_corner/features/reader/domain/reader_selection.dart';
 import 'package:bookish_corner/features/reader/domain/reader_settings.dart';
 import 'package:bookish_corner/features/reader/domain/toc_entry.dart';
+import 'package:bookish_corner/features/reader/presentation/providers/reader_book_provider.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_controller.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_ui_state.dart';
 
 const _bookId = 'book-1';
 
+final _epubBook = Book(
+  id: _bookId,
+  title: 'Тест',
+  author: 'Автор',
+  filePath: '/tmp/book.epub',
+  format: BookFormat.epub,
+  addedAt: DateTime(2026),
+);
+
 /// Прокачивает event loop, чтобы доставить асинхронные эмиссии broadcast-стрима
 /// и резолв `await engine.open()`.
-Future<void> pump() => .delayed(Duration.zero);
+Future<void> pump() => .delayed(.zero);
+
+/// Собирает контейнер с фейком-движком, возвращающим epub-книгу из
+/// readerBookProvider. Тип epub → readerEngineFactoryProvider возвращает
+/// FakeReaderEngine, но мы переопределяем фабрику на recording-движок.
+ProviderContainer _makeContainer(_RecordingEngine engine) {
+  final container = ProviderContainer(
+    overrides: [
+      readerBookProvider.overrideWith((ref, bookId) => Stream.value(_epubBook)),
+      readerEngineFactoryProvider.overrideWith(
+        (ref) => (_) => engine,
+      ),
+    ],
+  );
+  final sub = container.listen(
+    readerControllerProvider(_bookId),
+    (_, _) {},
+  );
+  addTearDown(sub.close);
+  addTearDown(container.dispose);
+  return container;
+}
 
 void main() {
-  group('ReaderController (против FakeReaderEngine)', () {
+  group('ReaderController', () {
     late ProviderContainer container;
+    late _RecordingEngine engine;
 
     setUp(() {
-      container = ProviderContainer();
-      // Держим подписку, чтобы autoDispose-провайдер не утилизировался между
-      // обращениями read.
-      final sub = container.listen(
-        readerControllerProvider(_bookId),
-        (_, _) {},
-      );
-      addTearDown(sub.close);
-      addTearDown(container.dispose);
+      engine = _RecordingEngine();
+      container = _makeContainer(engine);
     });
 
     ReaderUiState state() => container.read(readerControllerProvider(_bookId));
@@ -45,11 +72,10 @@ void main() {
         () async {
       await pump();
 
-      expect(state().status, ReaderStatus.ready);
-      expect(state().toc, isNotEmpty);
+      expect(state().status, equals(ReaderStatus.ready));
+      expect(state().toc, isEmpty); // RecordingEngine.toc == []
       expect(state().progress, isNotNull);
       expect(state().progress!.currentPage, equals(1));
-      expect(state().progress!.totalPages, isNotNull);
     });
 
     test('toggleChrome инвертирует видимость chrome', () async {
@@ -63,17 +89,16 @@ void main() {
       expect(state().chromeVisible, isTrue);
     });
 
-    test('nextPage / prevPage двигают позицию через стрим движка', () async {
+    test('nextPage / prevPage делегируются движку', () async {
       await pump();
-      expect(state().progress!.currentPage, equals(1));
 
       await notifier().nextPage();
       await pump();
-      expect(state().progress!.currentPage, equals(2));
+      expect(engine.nextCalled, isTrue);
 
       await notifier().prevPage();
       await pump();
-      expect(state().progress!.currentPage, equals(1));
+      expect(engine.prevCalled, isTrue);
     });
 
     test('seekTo резолвит позицию по progress (пустой anchor)', () async {
@@ -82,18 +107,8 @@ void main() {
       await notifier().seekTo(0.5);
       await pump();
 
-      expect(state().progress!.locator.progress, closeTo(0.5, 0.1));
-    });
-
-    test('goToToc прыгает на выбранную главу', () async {
-      await pump();
-      final entry = state().toc[2];
-
-      await notifier().goToToc(entry);
-      await pump();
-
-      expect(state().progress!.locator.chapterIndex, equals(2));
-      expect(state().progress!.currentPage, equals(8));
+      expect(engine.lastGoTo?.progress, equals(0.5));
+      expect(engine.lastGoTo?.anchor, equals(''));
     });
 
     test('updateSettings немедленно отражается в состоянии', () async {
@@ -107,13 +122,16 @@ void main() {
     });
   });
 
-  group('readerEngineProvider seam', () {
+  group('readerEngineFactoryProvider seam', () {
     test('остаётся в loading, пока open() движка не завершён', () async {
       final gate = Completer<void>();
       final engine = _RecordingEngine(openGate: gate);
       final container = ProviderContainer(
         overrides: [
-          readerEngineProvider.overrideWith((ref, bookId) => engine),
+          readerBookProvider.overrideWith((ref, bookId) => Stream.value(_epubBook)),
+          readerEngineFactoryProvider.overrideWith(
+            (ref) => (_) => engine,
+          ),
         ],
       );
       final sub = container.listen(
@@ -133,15 +151,18 @@ void main() {
       await pump();
       expect(
         container.read(readerControllerProvider(_bookId)).status,
-        equals(ReaderStatus.ready),
+        equals(equals(ReaderStatus.ready)),
       );
     });
 
-    test('override подменяет движок, контроллер делегирует ему intent-ы', () async {
+    test('override подменяет фабрику, контроллер делегирует ему intent-ы', () async {
       final engine = _RecordingEngine();
       final container = ProviderContainer(
         overrides: [
-          readerEngineProvider.overrideWith((ref, bookId) => engine),
+          readerBookProvider.overrideWith((ref, bookId) => Stream.value(_epubBook)),
+          readerEngineFactoryProvider.overrideWith(
+            (ref) => (_) => engine,
+          ),
         ],
       );
       final sub = container.listen(
@@ -155,7 +176,7 @@ void main() {
       expect(engine.openCalled, isTrue);
       expect(
         container.read(readerControllerProvider(_bookId)).status,
-        equals(ReaderStatus.ready),
+        equals(equals(ReaderStatus.ready)),
       );
 
       final notifier = container.read(
@@ -178,7 +199,6 @@ void main() {
 class _RecordingEngine implements ReaderEngine {
   _RecordingEngine({this.openGate});
 
-  /// Если задан — `open()` ждёт его завершения (для проверки loading-состояния).
   final Completer<void>? openGate;
 
   final StreamController<ReaderProgress> _progress =

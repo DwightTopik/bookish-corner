@@ -13,7 +13,9 @@ import 'package:bookish_corner/features/reader/presentation/providers/reader_ui_
 
 /// Контроллер экрана ридера. Family по `bookId`, авто-dispose при уходе с
 /// экрана. Делегирует навигацию активному [ReaderEngine] (полученному через
-/// `readerEngineProvider`) и отражает его поток позиции в [ReaderUiState].
+/// `readerEngineProvider`, который сам резолвит книгу и владеет движком) и
+/// отражает его поток позиции в [ReaderUiState]. Пока движок `null` (книга не
+/// загружена) — остаётся в `loading`.
 final readerControllerProvider =
     NotifierProvider.family<ReaderControllerNotifier, ReaderUiState, String>(
       ReaderControllerNotifier.new,
@@ -31,11 +33,13 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
 
   @override
   ReaderUiState build() {
-    // Используем ref.watch вместо ref.read: подписка удерживает autoDispose-
-    // провайдер движка живым на всё время жизни контроллера. Движок стабилен и
-    // повторных сборок не вызывает.
+    // Используем ref.watch: подписка удерживает autoDispose-провайдер движка
+    // живым на всё время жизни контроллера и пересобирает контроллер, когда
+    // движок появляется (после загрузки книги).
     final engine = ref.watch(readerEngineProvider(_bookId));
     _engine = engine;
+    if (engine == null) return const ReaderUiState();
+
     _cancelSubs();
     _progressSub = engine.progress.listen(_onProgress);
     _selectionSub = engine.selection.listen(_onSelection);

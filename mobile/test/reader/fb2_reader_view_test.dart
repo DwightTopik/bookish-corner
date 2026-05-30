@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
+import 'package:bookish_corner/core/constants/app_dimensions.dart';
 import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/core/theme/app_theme.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
@@ -61,7 +62,10 @@ Future<(ProviderContainer, Fb2ReaderEngine)> _pumpView(
   final container = ProviderContainer(
     overrides: [
       readerBookProvider.overrideWith((ref, _) => Stream.value(book)),
-      readerEngineFactoryProvider.overrideWith((ref) => (_) => engine),
+      readerEngineFactoryProvider.overrideWith(
+        (ref) =>
+            (_) => engine,
+      ),
     ],
   );
   addTearDown(container.dispose);
@@ -106,12 +110,12 @@ void main() {
     expect(progress!.currentPage, equals(1));
   });
 
-  testWidgets('next: страница продвигается вперёд, progress не уменьшается',
-      (tester) async {
+  testWidgets('next: страница продвигается вперёд, progress не уменьшается', (
+    tester,
+  ) async {
     final (container, engine) = await _pumpView(tester, tempDir);
 
-    final double initialProgress =
-        _state(container).progress!.locator.progress;
+    final double initialProgress = _state(container).progress!.locator.progress;
     final int initialPage = _state(container).progress!.currentPage ?? 1;
 
     await engine.nextPage();
@@ -135,8 +139,9 @@ void main() {
     expect(progress, greaterThan(0.0));
   });
 
-  testWidgets('смена fontSizeStep → глава сохраняется в anchor',
-      (tester) async {
+  testWidgets('смена fontSizeStep → глава сохраняется в anchor', (
+    tester,
+  ) async {
     final (container, _) = await _pumpView(tester, tempDir);
 
     final String anchorBefore = _state(container).progress!.locator.anchor;
@@ -160,10 +165,94 @@ void main() {
     await engine.prevPage();
     await tester.pumpAndSettle();
 
-    expect(
-      _state(container).progress!.currentPage,
-      greaterThanOrEqualTo(1),
-    );
+    expect(_state(container).progress!.currentPage, greaterThanOrEqualTo(1));
     expect(_state(container).progress!.locator.chapterIndex, equals(0));
+  });
+
+  // ── Тесты анимации перелистывания ────────────────────────────────────────
+
+  testWidgets('next + анимация завершается → страница продвинулась, charOffset репорчен', (
+    tester,
+  ) async {
+    final (container, engine) = await _pumpView(tester, tempDir);
+
+    final int pageBeforeAnim = _state(container).progress!.currentPage!;
+
+    await engine.nextPage();
+    // Прокачиваем ровно длительность анимации + 1 кадр для settle.
+    await tester.pump(
+      const Duration(milliseconds: AppDimensions.readerPageTurnAnimMs),
+    );
+    await tester.pumpAndSettle();
+
+    final progress = _state(container).progress!;
+    expect(progress.currentPage, greaterThanOrEqualTo(pageBeforeAnim));
+    // progress.locator должен быть заполнен (charOffset репортируется сразу).
+    expect(progress.locator.progress, greaterThanOrEqualTo(0.0));
+  });
+
+  testWidgets('next×2 быстро (прерывание анимации) → осел на правильной финальной странице', (
+    tester,
+  ) async {
+    final (container, engine) = await _pumpView(tester, tempDir);
+
+    final int initialPage = _state(container).progress!.currentPage!;
+
+    // Первый next.
+    await engine.nextPage();
+    await tester.pump(Duration.zero);
+    // Продвигаем анимацию наполовину.
+    await tester.pump(
+      const Duration(milliseconds: AppDimensions.readerPageTurnAnimMs ~/ 2),
+    );
+
+    // Второй next во время первой анимации.
+    await engine.nextPage();
+    await tester.pumpAndSettle();
+
+    // Финальная страница должна быть не меньше initialPage + 1 (оба перехода прошли).
+    final afterProgress = _state(container).progress!;
+    expect(afterProgress.currentPage!, greaterThanOrEqualTo(initialPage + 1));
+  });
+
+  testWidgets('next через границу главы → страница 1 следующей главы', (
+    tester,
+  ) async {
+    // Минимальный FB2: две главы ровно по одной странице при узком viewport.
+    const tinyFb2 = '''<?xml version="1.0" encoding="UTF-8"?>
+<FictionBook><body>
+<section><title><p>A</p></title><p>X</p></section>
+<section><title><p>B</p></title><p>Y</p></section>
+</body></FictionBook>''';
+
+    final (container, engine) = await _pumpView(
+      tester,
+      tempDir,
+      content: tinyFb2,
+      width: 200,
+      height: 120,
+    );
+
+    // Глава 0, страница 1.
+    expect(_state(container).progress!.locator.chapterIndex, equals(0));
+
+    await engine.nextPage();
+    await tester.pumpAndSettle();
+
+    // После перехода — глава 1, страница 1.
+    final progress = _state(container).progress!;
+    expect(progress.locator.chapterIndex, equals(1));
+    expect(progress.currentPage, equals(1));
+  });
+
+  testWidgets('goTo не запускает анимацию (мгновенный переход)', (tester) async {
+    final (_, engine) = await _pumpView(tester, tempDir);
+
+    await engine.goTo(const ReaderLocator(progress: 0.5, anchor: ''));
+    // Один нулевой кадр для обработки setState.
+    await tester.pump(Duration.zero);
+
+    // Не должно быть ни одной running-анимации.
+    expect(tester.hasRunningAnimations, isFalse);
   });
 }

@@ -29,6 +29,8 @@ class ReaderBottomPanel extends StatelessWidget {
     final AppColors(:textPrimary, :textSecondary) = context.appColors;
     final progress = state.progress;
     final chapterIndex = progress?.locator.chapterIndex ?? 0;
+    final chapterTitle =
+        progress?.chapterTitle ?? 'Глава ${chapterIndex + 1}';
     final pagesToNext = progress?.pagesToNextChapter;
     final bookProgress = progress?.locator.progress ?? 0;
 
@@ -44,23 +46,29 @@ class ReaderBottomPanel extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.menu_book_outlined,
-                    size: 18,
-                    color: textSecondary,
-                  ),
-                  const Gap(AppDimensions.smallGap),
-                  Text(
-                    'Глава ${chapterIndex + 1}',
-                    style: TextStyle(
-                      color: textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.menu_book_outlined,
+                      size: 18,
+                      color: textSecondary,
                     ),
-                  ),
-                ],
+                    const Gap(AppDimensions.smallGap),
+                    Expanded(
+                      child: Text(
+                        chapterTitle,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (pagesToNext != null)
                 Text(

@@ -432,7 +432,8 @@ class _PagePainter extends CustomPainter {
 
 /// Поверхность рендера для fb2/txt книг. Верстает текущую главу построчно
 /// (painter-на-блок), отображает одну страницу, связывает вью с
-/// [Fb2RenderController].
+/// [Fb2RenderController]. Анимирует смежные переходы (next/prev) горизонтальным
+/// слайдом; прыжки (onJump/onRelayout) мгновенны.
 class Fb2ReaderView extends ConsumerStatefulWidget {
   const Fb2ReaderView({super.key, required this.bookId});
 
@@ -442,7 +443,8 @@ class Fb2ReaderView extends ConsumerStatefulWidget {
   ConsumerState<Fb2ReaderView> createState() => _Fb2ReaderViewState();
 }
 
-class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView> {
+class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
+    with SingleTickerProviderStateMixin {
   final Map<_LayoutKey, _ChapterLayout> _cache = {};
 
   int _chapterIndex = 0;
@@ -457,8 +459,36 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView> {
   Fb2ReaderEngine? _engine;
   _ChapterLayout? _layout;
 
+  // ── Анимация слайда ─────────────────────────────────────────────────────
+
+  late final AnimationController _animCtrl;
+  late final Animation<double> _animSlide;
+
+  /// Уходящая страница: non-null пока идёт слайд-анимация.
+  List<_PageItem>? _outgoingUnits;
+
+  /// +1 = next (уходящая → влево, входящая въезжает справа).
+  /// -1 = prev (уходящая → вправо, входящая въезжает слева).
+  int _animDir = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: AppDimensions.readerPageTurnAnimMs),
+    );
+    _animSlide = CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOut);
+    _animCtrl.addStatusListener((AnimationStatus status) {
+      if (status == .completed && mounted) {
+        setState(() => _outgoingUnits = null);
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _animCtrl.dispose();
     // Снимаем хуки; движок принадлежит readerEngineProvider (ref.onDispose),
     // но вызываем dispose здесь тоже — он идемпотентен.
     _engine?.dispose();
@@ -496,6 +526,10 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView> {
     final _ChapterLayout? layout = _layout;
     if (layout == null) return;
 
+    // Захватить уходящую страницу ДО setState.
+    final List<_PageItem> outgoing =
+        layout.pages.elementAtOrNull(_localPage)?.units ?? const [];
+
     int newPage = _localPage;
     int newChapter = _chapterIndex;
     _ChapterLayout? newLayout = layout;
@@ -521,9 +555,17 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView> {
       _layout = newLayout;
     });
     _report();
+
+    _outgoingUnits = outgoing;
+    _animDir = 1;
+    _animCtrl.forward(from: 0.0);
   }
 
   void _onPrev() {
+    // Захватить уходящую страницу ДО setState.
+    final List<_PageItem> outgoing =
+        _layout?.pages.elementAtOrNull(_localPage)?.units ?? const [];
+
     int newPage = _localPage;
     int newChapter = _chapterIndex;
     _ChapterLayout? newLayout = _layout;
@@ -544,9 +586,17 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView> {
       _layout = newLayout;
     });
     _report();
+
+    _outgoingUnits = outgoing;
+    _animDir = -1;
+    _animCtrl.forward(from: 0.0);
   }
 
   void _onJump(int chapterIndex, int charOffset) {
+    // Прыжок — мгновенно: останавливаем анимацию, если шла.
+    _animCtrl.stop();
+    _outgoingUnits = null;
+
     _chapterIndex = chapterIndex;
     _layout = null;
     final _ChapterLayout? layout = _ensureLayout();
@@ -560,6 +610,10 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView> {
   }
 
   void _onRelayout() {
+    // Ре-вёрстка — мгновенно: останавливаем анимацию, если шла.
+    _animCtrl.stop();
+    _outgoingUnits = null;
+
     final int currentOffset =
         _layout?.pages.elementAtOrNull(_localPage)?.startCharOffset ?? 0;
     _layout = null;
@@ -665,18 +719,34 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView> {
         final int localPage = layout == null
             ? 0
             : _localPage.clamp(0, math.max(0, layout.pageCount - 1)).toInt();
-        final List<_PageItem> units =
+        final List<_PageItem> incomingUnits =
             layout?.pages.elementAtOrNull(localPage)?.units ?? const [];
+
+        final List<_PageItem>? outgoing = _outgoingUnits;
+
+        final Widget canvas = outgoing != null
+            ? _SlideCanvas(
+                animation: _animSlide,
+                animDir: _animDir,
+                outgoingUnits: outgoing,
+                incomingUnits: incomingUnits,
+                contentWidth: contentWidth,
+                hMargin: hMargin,
+                vMargin: vMargin + padding.top,
+                paragraphIndent: AppDimensions.readerParagraphIndent,
+                screenWidth: constraints.maxWidth,
+              )
+            : _PageCanvas(
+                units: incomingUnits,
+                contentWidth: contentWidth,
+                hMargin: hMargin,
+                vMargin: vMargin + padding.top,
+                paragraphIndent: AppDimensions.readerParagraphIndent,
+              );
 
         return ColoredBox(
           color: theme.bgColor,
-          child: _PageCanvas(
-            units: units,
-            contentWidth: contentWidth,
-            hMargin: hMargin,
-            vMargin: vMargin + padding.top,
-            paragraphIndent: AppDimensions.readerParagraphIndent,
-          ),
+          child: canvas,
         );
       },
     );
@@ -711,6 +781,74 @@ class _PageCanvas extends StatelessWidget {
         paragraphIndent: paragraphIndent,
       ),
       child: const SizedBox.expand(),
+    );
+  }
+}
+
+// ─────────────── Анимированный виджет двух страниц (слайд) ──────────────────
+
+/// Рисует уходящую и входящую страницы бок о бок со сдвигом по X, управляемым
+/// [animation] (0.0 → 1.0). [animDir]: +1 = next, -1 = prev.
+class _SlideCanvas extends StatelessWidget {
+  const _SlideCanvas({
+    required this.animation,
+    required this.animDir,
+    required this.outgoingUnits,
+    required this.incomingUnits,
+    required this.contentWidth,
+    required this.hMargin,
+    required this.vMargin,
+    required this.paragraphIndent,
+    required this.screenWidth,
+  });
+
+  final Animation<double> animation;
+  final int animDir;
+  final List<_PageItem> outgoingUnits;
+  final List<_PageItem> incomingUnits;
+  final double contentWidth;
+  final double hMargin;
+  final double vMargin;
+  final double paragraphIndent;
+  final double screenWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext ctx, Widget? _) {
+          final double t = animation.value;
+          // Уходящая: двигается в сторону animDir (влево при next, вправо при prev).
+          final double outTx = -animDir * t * screenWidth;
+          // Входящая: въезжает с противоположной стороны к 0.
+          final double inTx = animDir * (1.0 - t) * screenWidth;
+          return Stack(
+            children: [
+              Transform.translate(
+                offset: Offset(outTx, 0),
+                child: _PageCanvas(
+                  units: outgoingUnits,
+                  contentWidth: contentWidth,
+                  hMargin: hMargin,
+                  vMargin: vMargin,
+                  paragraphIndent: paragraphIndent,
+                ),
+              ),
+              Transform.translate(
+                offset: Offset(inTx, 0),
+                child: _PageCanvas(
+                  units: incomingUnits,
+                  contentWidth: contentWidth,
+                  hMargin: hMargin,
+                  vMargin: vMargin,
+                  paragraphIndent: paragraphIndent,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

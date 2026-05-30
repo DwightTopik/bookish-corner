@@ -12,6 +12,7 @@ class ReaderProgress {
     this.currentPage,
     this.totalPages,
     this.pagesToNextChapter,
+    this.chapterTitle,
   });
 
   final ReaderLocator locator;
@@ -23,17 +24,23 @@ class ReaderProgress {
   /// Сколько страниц осталось до начала следующей главы.
   final int? pagesToNextChapter;
 
+  /// Реальный заголовок текущей главы из TOC (например «Глава 1»).
+  /// `null`, если TOC ещё не построен или глава безымянная.
+  final String? chapterTitle;
+
   ReaderProgress copyWith({
     ReaderLocator? locator,
     int? currentPage,
     int? totalPages,
     int? pagesToNextChapter,
+    String? chapterTitle,
   }) {
     return ReaderProgress(
       locator: locator ?? this.locator,
       currentPage: currentPage ?? this.currentPage,
       totalPages: totalPages ?? this.totalPages,
       pagesToNextChapter: pagesToNextChapter ?? this.pagesToNextChapter,
+      chapterTitle: chapterTitle ?? this.chapterTitle,
     );
   }
 }

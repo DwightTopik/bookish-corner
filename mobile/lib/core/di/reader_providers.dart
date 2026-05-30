@@ -1,23 +1,43 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/reader/data/fake_reader_engine.dart';
+import 'package:bookish_corner/features/reader/data/fb2_reader_engine.dart';
 import 'package:bookish_corner/features/reader/domain/reader_engine.dart';
+import 'package:bookish_corner/features/reader/presentation/providers/reader_book_provider.dart';
 
-/// DI-seam движка ридера (swap-паттерн репозитория, как `bookRepositoryProvider`).
-///
-/// В A1 всегда отдаёт [FakeReaderEngine]. Позже одна строка здесь превратится в
-/// фабрику, выбирающую реальный движок по формату книги (epub/fb2/pdf/txt —
-/// задачи B/C). Family по `bookId` — чтобы сигнатура не менялась, когда фабрике
-/// понадобится сама книга.
-///
-/// Провайдер владеет жизненным циклом движка: создаёт его и диспозит через
-/// [Ref.onDispose]. Контроллер вызывает [ReaderEngine.open] и владеет только
-/// своими подписками на потоки.
-final readerEngineProvider = Provider.family<ReaderEngine, String>((
+/// Фабрика движка ридера по [Book]: формат → конкретная реализация
+/// [ReaderEngine]. Движок зависит от файла и формата книги, поэтому seam — не
+/// просто провайдер движка, а функция от книги. Чистая, без побочных эффектов;
+/// владение жизненным циклом — на [readerEngineProvider].
+typedef ReaderEngineFactory = ReaderEngine Function(Book book);
+
+/// Swap-точка типов движка (как `bookRepositoryProvider`). fb2/txt →
+/// [Fb2ReaderEngine]; epub/pdf пока → [FakeReaderEngine] (задачи C). Тесты
+/// подменяют фабрику на управляемый фейк.
+final readerEngineFactoryProvider = Provider<ReaderEngineFactory>((ref) {
+  return (book) => switch (book.format) {
+    .fb2 || .txt => Fb2ReaderEngine(
+      filePath: book.filePath,
+      format: book.format,
+      fallbackTitle: book.title,
+    ),
+    _ => FakeReaderEngine(),
+  };
+});
+
+/// Движок активной книги. Family по `bookId`: дожидается [Book] из
+/// `readerBookProvider`, строит движок фабрикой и ВЛАДЕЕТ его жизненным циклом
+/// (`ref.onDispose`). `null`, пока книга не загружена — тогда контроллер держит
+/// `loading`. Поверхность рендера читает тот же инстанс
+/// (`ref.read(...) as Fb2ReaderEngine`).
+final readerEngineProvider = Provider.family<ReaderEngine?, String>((
   ref,
   bookId,
 ) {
-  final engine = FakeReaderEngine();
+  final book = ref.watch(readerBookProvider(bookId)).asData?.value;
+  if (book == null) return null;
+  final engine = ref.watch(readerEngineFactoryProvider)(book);
   ref.onDispose(engine.dispose);
   return engine;
 }, isAutoDispose: true);

@@ -22,12 +22,13 @@ import 'package:bookish_corner/features/reader/presentation/screens/reader_scree
 
 const _bookId = 'book-1';
 
+// epub → ReaderView выбирает FakeReaderView, каст as Fb2ReaderEngine не нужен.
 final _book = Book(
   id: _bookId,
   title: 'Тестовая книга',
   author: 'Автор Тестов',
-  filePath: '/tmp/book.fb2',
-  format: BookFormat.fb2,
+  filePath: '/tmp/book.epub',
+  format: BookFormat.epub,
   addedAt: DateTime(2026),
 );
 
@@ -39,8 +40,8 @@ Future<ProviderContainer> _pumpReader(
 ) async {
   final container = ProviderContainer(
     overrides: [
-      readerEngineProvider.overrideWith((ref, bookId) => engine),
       readerBookProvider.overrideWith((ref, bookId) => Stream.value(_book)),
+      readerEngineFactoryProvider.overrideWith((ref) => (_) => engine),
     ],
   );
   addTearDown(container.dispose);
