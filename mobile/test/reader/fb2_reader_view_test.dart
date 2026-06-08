@@ -99,7 +99,13 @@ void main() {
   setUp(() async {
     tempDir = await Directory.systemTemp.createTemp('fb2_view_test');
     addTearDown(() async {
-      if (tempDir.existsSync()) await tempDir.delete(recursive: true);
+      if (!tempDir.existsSync()) return;
+      try {
+        await Future.any<void>([
+          tempDir.delete(recursive: true).then((_) {}),
+          Future<void>.delayed(const Duration(seconds: 3)),
+        ]);
+      } catch (_) {}
     });
   });
 
@@ -171,49 +177,51 @@ void main() {
 
   // ── Тесты анимации перелистывания ────────────────────────────────────────
 
-  testWidgets('next + анимация завершается → страница продвинулась, charOffset репорчен', (
-    tester,
-  ) async {
-    final (container, engine) = await _pumpView(tester, tempDir);
+  testWidgets(
+    'next + анимация завершается → страница продвинулась, charOffset репорчен',
+    (tester) async {
+      final (container, engine) = await _pumpView(tester, tempDir);
 
-    final int pageBeforeAnim = _state(container).progress!.currentPage!;
+      final int pageBeforeAnim = _state(container).progress!.currentPage!;
 
-    await engine.nextPage();
-    // Прокачиваем ровно длительность анимации + 1 кадр для settle.
-    await tester.pump(
-      const Duration(milliseconds: AppDimensions.readerPageTurnAnimMs),
-    );
-    await tester.pumpAndSettle();
+      await engine.nextPage();
+      // Прокачиваем ровно длительность анимации + 1 кадр для settle.
+      await tester.pump(
+        const Duration(milliseconds: AppDimensions.readerPageTurnAnimMs),
+      );
+      await tester.pumpAndSettle();
 
-    final progress = _state(container).progress!;
-    expect(progress.currentPage, greaterThanOrEqualTo(pageBeforeAnim));
-    // progress.locator должен быть заполнен (charOffset репортируется сразу).
-    expect(progress.locator.progress, greaterThanOrEqualTo(0.0));
-  });
+      final progress = _state(container).progress!;
+      expect(progress.currentPage, greaterThanOrEqualTo(pageBeforeAnim));
+      // progress.locator должен быть заполнен (charOffset репортируется сразу).
+      expect(progress.locator.progress, greaterThanOrEqualTo(0.0));
+    },
+  );
 
-  testWidgets('next×2 быстро (прерывание анимации) → осел на правильной финальной странице', (
-    tester,
-  ) async {
-    final (container, engine) = await _pumpView(tester, tempDir);
+  testWidgets(
+    'next×2 быстро (прерывание анимации) → осел на правильной финальной странице',
+    (tester) async {
+      final (container, engine) = await _pumpView(tester, tempDir);
 
-    final int initialPage = _state(container).progress!.currentPage!;
+      final int initialPage = _state(container).progress!.currentPage!;
 
-    // Первый next.
-    await engine.nextPage();
-    await tester.pump(Duration.zero);
-    // Продвигаем анимацию наполовину.
-    await tester.pump(
-      const Duration(milliseconds: AppDimensions.readerPageTurnAnimMs ~/ 2),
-    );
+      // Первый next.
+      await engine.nextPage();
+      await tester.pump(Duration.zero);
+      // Продвигаем анимацию наполовину.
+      await tester.pump(
+        const Duration(milliseconds: AppDimensions.readerPageTurnAnimMs ~/ 2),
+      );
 
-    // Второй next во время первой анимации.
-    await engine.nextPage();
-    await tester.pumpAndSettle();
+      // Второй next во время первой анимации.
+      await engine.nextPage();
+      await tester.pumpAndSettle();
 
-    // Финальная страница должна быть не меньше initialPage + 1 (оба перехода прошли).
-    final afterProgress = _state(container).progress!;
-    expect(afterProgress.currentPage!, greaterThanOrEqualTo(initialPage + 1));
-  });
+      // Финальная страница должна быть не меньше initialPage + 1 (оба перехода прошли).
+      final afterProgress = _state(container).progress!;
+      expect(afterProgress.currentPage!, greaterThanOrEqualTo(initialPage + 1));
+    },
+  );
 
   testWidgets('next через границу главы → страница 1 следующей главы', (
     tester,
@@ -245,7 +253,9 @@ void main() {
     expect(progress.currentPage, equals(1));
   });
 
-  testWidgets('goTo не запускает анимацию (мгновенный переход)', (tester) async {
+  testWidgets('goTo не запускает анимацию (мгновенный переход)', (
+    tester,
+  ) async {
     final (_, engine) = await _pumpView(tester, tempDir);
 
     await engine.goTo(const ReaderLocator(progress: 0.5, anchor: ''));

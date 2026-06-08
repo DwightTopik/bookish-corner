@@ -31,37 +31,59 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
   StreamSubscription<ReaderProgress>? _progressSub;
   StreamSubscription<ReaderSelection>? _selectionSub;
 
+  // Последнее известное состояние. Держим отдельно, чтобы при бенайн-пересборке
+  // build (тот же инстанс движка) вернуть накопленный снимок, а не сбрасывать
+  // экран в loading с пустым toc.
+  ReaderUiState _last = const ReaderUiState();
+
+  /// Единая точка записи состояния: синхронизирует `state` и [_last].
+  void _set(ReaderUiState next) {
+    _last = next;
+    state = next;
+  }
+
   @override
   ReaderUiState build() {
     // Используем ref.watch: подписка удерживает autoDispose-провайдер движка
     // живым на всё время жизни контроллера и пересобирает контроллер, когда
     // движок появляется (после загрузки книги).
     final engine = ref.watch(readerEngineProvider(_bookId));
+
+    // Тот же инстанс движка — пересборка провайдера не должна ронять прогресс,
+    // toc и ready: не пере-подписываемся, не пере-открываем, отдаём снимок.
+    if (engine != null && identical(engine, _engine)) {
+      return _last;
+    }
+
     _engine = engine;
-    if (engine == null) return const ReaderUiState();
+    if (engine == null) {
+      _last = const ReaderUiState();
+      return _last;
+    }
 
     _cancelSubs();
     _progressSub = engine.progress.listen(_onProgress);
     _selectionSub = engine.selection.listen(_onSelection);
     ref.onDispose(_cancelSubs);
     unawaited(_open(engine));
-    return const ReaderUiState();
+    _last = const ReaderUiState();
+    return _last;
   }
 
   Future<void> _open(ReaderEngine engine) async {
     try {
       await engine.open();
       if (!ref.mounted) return;
-      state = state.copyWith(status: ReaderStatus.ready, toc: engine.toc);
+      _set(_last.copyWith(status: ReaderStatus.ready, toc: engine.toc));
     } catch (e) {
       if (!ref.mounted) return;
-      state = state.copyWith(status: ReaderStatus.error, error: e);
+      _set(_last.copyWith(status: ReaderStatus.error, error: e));
     }
   }
 
   void _onProgress(ReaderProgress progress) {
     if (!ref.mounted) return;
-    state = state.copyWith(progress: progress);
+    _set(_last.copyWith(progress: progress));
   }
 
   void _onSelection(ReaderSelection selection) {
@@ -71,7 +93,7 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
   // --- Intent-методы (дёргаются из chrome, B2) ---
 
   void toggleChrome() =>
-      state = state.copyWith(chromeVisible: !state.chromeVisible);
+      _set(_last.copyWith(chromeVisible: !_last.chromeVisible));
 
   Future<void> nextPage() async => _engine?.nextPage();
 
@@ -84,7 +106,7 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
   Future<void> goToToc(TocEntry entry) async => _engine?.goTo(entry.anchor);
 
   Future<void> updateSettings(ReaderSettings settings) async {
-    state = state.copyWith(settings: settings);
+    _set(_last.copyWith(settings: settings));
     await _engine?.applySettings(settings);
   }
 

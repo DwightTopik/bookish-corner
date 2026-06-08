@@ -9,6 +9,7 @@ import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
 import 'package:bookish_corner/features/reader/data/document/reader_document.dart';
 import 'package:bookish_corner/features/reader/data/fb2_reader_engine.dart';
+import 'package:bookish_corner/features/reader/data/fb2_render_controller.dart';
 import 'package:bookish_corner/features/reader/domain/reader_engine.dart';
 import 'package:bookish_corner/features/reader/domain/reader_settings.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_controller.dart';
@@ -489,9 +490,9 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   @override
   void dispose() {
     _animCtrl.dispose();
-    // Снимаем хуки; движок принадлежит readerEngineProvider (ref.onDispose),
-    // но вызываем dispose здесь тоже — он идемпотентен.
-    _engine?.dispose();
+    // Снимаем ТОЛЬКО свои хуки. Движок НЕ диспоузим — им владеет
+    // readerEngineProvider (ref.onDispose) на всё время жизни экрана; вью —
+    // лишь временный потребитель, её ре-маунт не должен убивать общий движок.
     _unbindEngine();
     super.dispose();
   }
@@ -512,10 +513,14 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   void _unbindEngine() {
     final rc = _engine?.renderController;
     if (rc != null) {
-      rc.onNext = null;
-      rc.onPrev = null;
-      rc.onJump = null;
-      rc.onRelayout = null;
+      // Снимаем хук только если он всё ещё наш: при ре-маунте на стабильном
+      // инстансе движка новая вью уже могла перепривязать хуки на себя — не
+      // затираем её привязку.
+      final Fb2RenderController(:onNext, :onPrev, :onJump, :onRelayout) = rc;
+      if (onNext == _onNext) rc.onNext = null;
+      if (onPrev == _onPrev) rc.onPrev = null;
+      if (onJump == _onJump) rc.onJump = null;
+      if (onRelayout == _onRelayout) rc.onRelayout = null;
     }
     _engine = null;
   }
@@ -523,6 +528,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   // ── Навигация ───────────────────────────────────────────────────────────
 
   void _onNext() {
+    if (!mounted) return;
     final _ChapterLayout? layout = _layout;
     if (layout == null) return;
 
@@ -562,6 +568,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   }
 
   void _onPrev() {
+    if (!mounted) return;
     // Захватить уходящую страницу ДО setState.
     final List<_PageItem> outgoing =
         _layout?.pages.elementAtOrNull(_localPage)?.units ?? const [];
@@ -593,6 +600,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   }
 
   void _onJump(int chapterIndex, int charOffset) {
+    if (!mounted) return;
     // Прыжок — мгновенно: останавливаем анимацию, если шла.
     _animCtrl.stop();
     _outgoingUnits = null;
@@ -610,6 +618,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   }
 
   void _onRelayout() {
+    if (!mounted) return;
     // Ре-вёрстка — мгновенно: останавливаем анимацию, если шла.
     _animCtrl.stop();
     _outgoingUnits = null;
@@ -629,6 +638,8 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   // ── Вёрстка ─────────────────────────────────────────────────────────────
 
   _ChapterLayout? _ensureLayout() {
+    // Чтение темы ниже делает ancestor-lookup — нельзя на defunct-элементе.
+    if (!mounted) return null;
     final Fb2ReaderEngine? engine = _engine;
     if (engine == null || _contentWidth == 0 || _pageHeight == 0) return null;
     final ReaderDocument doc = engine.document;

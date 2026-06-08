@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:bookish_corner/features/library/domain/book_format.dart';
@@ -64,6 +65,14 @@ class Fb2ReaderEngine implements ReaderEngine {
   ReaderSettings _settings = const ReaderSettings();
   bool _opened = false;
   bool _disposed = false;
+
+  /// Был ли уже выполнен реальный парс/декод (open прошёл без раннего выхода).
+  @visibleForTesting
+  bool get isOpened => _opened;
+
+  /// Освобождён ли движок (стримы закрыты, картинки убраны).
+  @visibleForTesting
+  bool get isDisposed => _disposed;
 
   @override
   ReaderCapabilities get capabilities => const .new(

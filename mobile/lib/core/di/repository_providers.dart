@@ -1,5 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bookish_corner/core/di/database_provider.dart';
+import 'package:bookish_corner/features/reader/data/drift_reader_annotation_repository.dart';
+import 'package:bookish_corner/features/reader/data/drift_reader_bookmark_repository.dart';
+import 'package:bookish_corner/features/reader/data/drift_reader_progress_repository.dart';
+import 'package:bookish_corner/features/reader/domain/reader_annotation_repository.dart';
+import 'package:bookish_corner/features/reader/domain/reader_bookmark_repository.dart';
+import 'package:bookish_corner/features/reader/domain/reader_progress_repository.dart';
 import 'package:bookish_corner/features/book_details/data/empty_book_recommendation_repository.dart';
 import 'package:bookish_corner/features/book_details/data/google_books_client.dart';
 import 'package:bookish_corner/features/book_details/data/google_books_metadata_repository.dart';
@@ -73,3 +79,20 @@ final chapterResolverProvider = Provider<ChapterResolver>((ref) {
     SingleFileChapterResolver(),
   ]);
 });
+
+final readerProgressRepositoryProvider = Provider<ReaderProgressRepository>((
+  ref,
+) {
+  return DriftReaderProgressRepository(ref.watch(appDatabaseProvider));
+});
+
+final readerBookmarkRepositoryProvider = Provider<ReaderBookmarkRepository>((
+  ref,
+) {
+  return DriftReaderBookmarkRepository(ref.watch(appDatabaseProvider));
+});
+
+final readerAnnotationRepositoryProvider =
+    Provider<ReaderAnnotationRepository>((ref) {
+      return DriftReaderAnnotationRepository(ref.watch(appDatabaseProvider));
+    });

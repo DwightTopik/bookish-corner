@@ -11,6 +11,7 @@ import 'package:bookish_corner/features/reader/presentation/providers/reader_ui_
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_bottom_panel.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_gesture_layer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_immersive_footer.dart';
+import 'package:bookish_corner/features/reader/presentation/widgets/reader_chapters_sheet.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_toolbar.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_top_bar.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_view.dart';
@@ -163,7 +164,7 @@ class _ReaderReadyView extends ConsumerWidget {
                     ReaderToolbar(
                       isBookmarked: state.isBookmarked,
                       hasAudioVersion: _hasAudioVersion,
-                      onChapters: () {}, // D5: sheet оглавления.
+                      onChapters: () => showReaderChaptersSheet(context, bookId),
                       onNotebook: () {}, // E: экран блокнота.
                       onListen: () {}, // связанная аудиоверсия.
                       onSettings: () {}, // B3: sheet настроек.

@@ -16,13 +16,16 @@ typedef ReaderEngineFactory = ReaderEngine Function(Book book);
 /// [Fb2ReaderEngine]; epub/pdf пока → [FakeReaderEngine] (задачи C). Тесты
 /// подменяют фабрику на управляемый фейк.
 final readerEngineFactoryProvider = Provider<ReaderEngineFactory>((ref) {
-  return (book) => switch (book.format) {
-    .fb2 || .txt => Fb2ReaderEngine(
-      filePath: book.filePath,
-      format: book.format,
-      fallbackTitle: book.title,
-    ),
-    _ => FakeReaderEngine(),
+  return (book) {
+    final Book(:filePath, :format, :title) = book;
+    return switch (format) {
+      .fb2 || .txt => Fb2ReaderEngine(
+        filePath: filePath,
+        format: format,
+        fallbackTitle: title,
+      ),
+      _ => FakeReaderEngine(),
+    };
   };
 });
 
@@ -35,8 +38,21 @@ final readerEngineProvider = Provider.family<ReaderEngine?, String>((
   ref,
   bookId,
 ) {
-  final book = ref.watch(readerBookProvider(bookId)).asData?.value;
-  if (book == null) return null;
+  // Зависим ТОЛЬКО от полей книги, влияющих на движок (файл/формат/заголовок).
+  // Record-кортеж имеет value-equality, поэтому провайдер пересобирает движок
+  // лишь при их смене, а не на каждый ре-эмит Book из Drift (метаданные,
+  // прогресс в D6 и т.п.). Гарантирует ровно один open() на книгу.
+  final identity = ref.watch(
+    readerBookProvider(bookId).select((async) {
+      final book = async.asData?.value;
+      if (book == null) return null;
+      final Book(:filePath, :format, :title) = book;
+      return (filePath, format, title);
+    }),
+  );
+  if (identity == null) return null;
+  // Полную книгу читаем нереактивно — только чтобы передать фабрике.
+  final book = ref.read(readerBookProvider(bookId)).asData!.value!;
   final engine = ref.watch(readerEngineFactoryProvider)(book);
   ref.onDispose(engine.dispose);
   return engine;

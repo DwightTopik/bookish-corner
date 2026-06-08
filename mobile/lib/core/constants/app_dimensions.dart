@@ -65,6 +65,12 @@ class AppDimensions {
   static const double bookDetailsRecommendationCoverHeight = 112;
   static const double bookDetailsRecommendationWidth = 118;
 
+  // --- ReaderChaptersSheet ---
+
+  static const double readerChaptersDepthIndent = 16.0;
+  static const double readerChaptersHandleWidth  = 40.0;
+  static const double readerChaptersHandleHeight = 4.0;
+
   // --- Fb2ReaderView: типографика и геометрия ---
 
   /// Базовый размер шрифта тела (fontSizeStep == 0).
