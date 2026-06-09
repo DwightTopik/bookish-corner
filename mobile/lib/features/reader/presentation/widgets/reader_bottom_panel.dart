@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import 'package:bookish_corner/core/constants/app_dimensions.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/features/reader/domain/reader_palette.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_ui_state.dart';
 
 /// Нижняя панель chrome (над тулбаром, видна при `chromeVisible`).
@@ -14,19 +15,20 @@ class ReaderBottomPanel extends StatelessWidget {
   const ReaderBottomPanel({
     super.key,
     required this.state,
+    required this.palette,
     required this.onSeek,
     required this.onBack,
     required this.onForward,
   });
 
   final ReaderUiState state;
+  final ReaderPalette palette;
   final ValueChanged<double> onSeek;
   final VoidCallback onBack;
   final VoidCallback onForward;
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:textPrimary, :textSecondary) = context.appColors;
     final progress = state.progress;
     final chapterIndex = progress?.locator.chapterIndex ?? 0;
     final chapterTitle =
@@ -52,7 +54,7 @@ class ReaderBottomPanel extends StatelessWidget {
                     Icon(
                       Icons.menu_book_outlined,
                       size: 18,
-                      color: textSecondary,
+                      color: palette.muted,
                     ),
                     const Gap(AppDimensions.smallGap),
                     Expanded(
@@ -61,7 +63,7 @@ class ReaderBottomPanel extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         style: TextStyle(
-                          color: textPrimary,
+                          color: palette.text,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -73,15 +75,20 @@ class ReaderBottomPanel extends StatelessWidget {
               if (pagesToNext != null)
                 Text(
                   'ещё $pagesToNext стр',
-                  style: TextStyle(color: textSecondary, fontSize: 13),
+                  style: TextStyle(color: palette.muted, fontSize: 13),
                 ),
             ],
           ),
           const Gap(AppDimensions.readerPanelRowGap),
-          _BookProgressSlider(value: bookProgress, onSeek: onSeek),
+          _BookProgressSlider(
+            value: bookProgress,
+            palette: palette,
+            onSeek: onSeek,
+          ),
           const Gap(AppDimensions.readerPanelRowGap),
           _ProgressFooterRow(
             bookProgress: bookProgress,
+            palette: palette,
             canGoBack: state.navHistory.canGoBack,
             canGoForward: state.navHistory.canGoForward,
             onBack: onBack,
@@ -97,9 +104,14 @@ class ReaderBottomPanel extends StatelessWidget {
 /// значение и показываем живой %, на onChangeEnd → [onSeek]. Пока тащим, стрим
 /// движка не влияет на позицию ручки (чтобы не дёргалось).
 class _BookProgressSlider extends StatefulWidget {
-  const _BookProgressSlider({required this.value, required this.onSeek});
+  const _BookProgressSlider({
+    required this.value,
+    required this.palette,
+    required this.onSeek,
+  });
 
   final double value;
+  final ReaderPalette palette;
   final ValueChanged<double> onSeek;
 
   @override
@@ -111,17 +123,18 @@ class _BookProgressSliderState extends State<_BookProgressSlider> {
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:textPrimary, :border) = context.appColors;
+    final accent = context.appColors.accent;
+    final palette = widget.palette;
     final value = (_scrubValue ?? widget.value).clamp(0.0, 1.0);
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
         trackHeight: 2,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-        activeTrackColor: textPrimary,
-        inactiveTrackColor: border,
-        thumbColor: textPrimary,
-        overlayColor: textPrimary.withValues(alpha: 0.12),
+        activeTrackColor: palette.text,
+        inactiveTrackColor: palette.muted,
+        thumbColor: accent,
+        overlayColor: palette.text.withValues(alpha: 0.12),
       ),
       child: Slider(
         value: value,
@@ -138,6 +151,7 @@ class _BookProgressSliderState extends State<_BookProgressSlider> {
 class _ProgressFooterRow extends StatelessWidget {
   const _ProgressFooterRow({
     required this.bookProgress,
+    required this.palette,
     required this.canGoBack,
     required this.canGoForward,
     required this.onBack,
@@ -145,6 +159,7 @@ class _ProgressFooterRow extends StatelessWidget {
   });
 
   final double bookProgress;
+  final ReaderPalette palette;
   final bool canGoBack;
   final bool canGoForward;
   final VoidCallback onBack;
@@ -152,7 +167,6 @@ class _ProgressFooterRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textSecondary = context.appColors.textSecondary;
     final percent = (bookProgress.clamp(0.0, 1.0) * 100).round();
     return Stack(
       alignment: Alignment.center,
@@ -161,7 +175,7 @@ class _ProgressFooterRow extends StatelessWidget {
           child: Text(
             '$percent% от всей книги',
             style: TextStyle(
-              color: textSecondary,
+              color: palette.muted,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),

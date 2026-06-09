@@ -10,9 +10,6 @@ enum ReaderScrollMode { paginated, scroll }
 /// Настройки ридера — общая модель, применяется к активному движку через
 /// [ReaderEngine.applySettings]. Движки, не поддерживающие ту или иную опцию
 /// (см. [ReaderCapabilities]), игнорируют соответствующие поля.
-///
-/// Sheet настроек (задача B3) может расширить модель — поля держим плоскими и
-/// расширяемыми, но сейчас не усложняем.
 class ReaderSettings {
   const ReaderSettings({
     this.background = ReaderBackground.system,
@@ -22,7 +19,7 @@ class ReaderSettings {
     this.fontSizeStep = 0,
     this.textAlign = ReaderTextAlign.left,
     this.marginStep = 1,
-    this.lineHeight = 1.5,
+    this.lineSpacingStep = 1,
     this.scrollMode = ReaderScrollMode.paginated,
   });
 
@@ -32,16 +29,19 @@ class ReaderSettings {
   /// `null` = использовать системную яркость.
   final double? brightness;
 
-  /// Имя шрифта; `'Default'` = резолвится движком/CSS.
+  /// Имя шрифта: 'Default' / 'Roboto' / 'PTSerif' / 'PTSans' / 'Playfair'.
   final String fontFamily;
 
   /// Шаг размера шрифта относительно базового (0 = базовый).
   final int fontSizeStep;
   final ReaderTextAlign textAlign;
 
-  /// Шаг величины полей относительно базового.
+  /// Шаг величины полей относительно базового (0..2).
   final int marginStep;
-  final double lineHeight;
+
+  /// Межстрочный интервал: 0=компактный, 1=обычный, 2=широкий.
+  final int lineSpacingStep;
+
   final ReaderScrollMode scrollMode;
 
   ReaderSettings copyWith({
@@ -53,7 +53,7 @@ class ReaderSettings {
     int? fontSizeStep,
     ReaderTextAlign? textAlign,
     int? marginStep,
-    double? lineHeight,
+    int? lineSpacingStep,
     ReaderScrollMode? scrollMode,
   }) {
     return ReaderSettings(
@@ -64,7 +64,7 @@ class ReaderSettings {
       fontSizeStep: fontSizeStep ?? this.fontSizeStep,
       textAlign: textAlign ?? this.textAlign,
       marginStep: marginStep ?? this.marginStep,
-      lineHeight: lineHeight ?? this.lineHeight,
+      lineSpacingStep: lineSpacingStep ?? this.lineSpacingStep,
       scrollMode: scrollMode ?? this.scrollMode,
     );
   }

@@ -115,6 +115,31 @@ class AppDimensions {
   /// Горизонтальное смещение для красной строки вычисляется из
   /// [readerParagraphIndent]; хранится отдельно, чтобы линт не жаловался на
   /// дублирование цифр в TextPainter.
+  /// Межстрочный интервал: 0=компактный, 1=обычный, 2=широкий.
+  static double readerLineHeight(int step) =>
+      const [1.3, 1.5, 1.8][step.clamp(0, 2)];
+
+  static const int readerDimAnimMs = 100;
+
+  static const double readerSettingsSectionGap = 20;
+  static const double readerSettingsControlHeight = 48;
+  static const double readerSettingsCompactIconSize = 18.0;
+  static const double readerSettingsDotSize = 6.0;
+  static const double readerSettingsDotSpacing = 6.0;
+  static const double readerSettingsBgSwatchSize = 44;
+  static const double readerSettingsBgSwatchRadius = 12;
+  static const double readerSettingsPillRadius = 24;
+  static const double readerSettingsStepperIconSize = 20;
+  static const double readerSettingsFontTileMinWidth = 72;
+  static const double readerSettingsHandleWidth = 40;
+  static const double readerSettingsHandleHeight = 4;
+
+  // Theme pill chips (background selector)
+  static const double readerSettingsThemeChipHeight = 34.0;
+  static const double readerSettingsThemeChipRadius = 20.0;
+  static const double readerSettingsThemeChipHPadding = 12.0;
+  static const double readerSettingsThemeChipFontSize = 13.0;
+
   static double readerFontSize(int step) =>
       readerFontSizeBase + step * readerFontSizeStep;
 

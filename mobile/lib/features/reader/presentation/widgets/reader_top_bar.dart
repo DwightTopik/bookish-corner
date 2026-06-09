@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/features/reader/domain/reader_palette.dart';
 
 /// Верхняя панель chrome (видна при `chromeVisible`). Зеркалит `_PlayerHeader`:
 /// слева шеврон-вниз (pop экрана), по центру title (жирный) + author
@@ -14,20 +14,21 @@ class ReaderTopBar extends StatelessWidget {
     super.key,
     required this.title,
     required this.author,
+    required this.palette,
     required this.onClose,
     required this.onMenu,
   });
 
   final String title;
   final String author;
+  final ReaderPalette palette;
   final VoidCallback onClose;
   final VoidCallback onMenu;
 
   @override
   Widget build(BuildContext context) {
-    final AppColors(:bg, :textPrimary, :textTertiary) = context.appColors;
     return DecoratedBox(
-      decoration: BoxDecoration(color: bg.withValues(alpha: 0.92)),
+      decoration: BoxDecoration(color: palette.bg),
       child: SafeArea(
         bottom: false,
         child: Row(
@@ -35,7 +36,7 @@ class ReaderTopBar extends StatelessWidget {
             IconButton(
               tooltip: 'Назад',
               onPressed: onClose,
-              icon: Icon(Icons.keyboard_arrow_down, color: textPrimary),
+              icon: Icon(Icons.keyboard_arrow_down, color: palette.text),
             ),
             Expanded(
               child: Column(
@@ -47,7 +48,7 @@ class ReaderTopBar extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: textPrimary,
+                      color: palette.text,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
@@ -58,7 +59,7 @@ class ReaderTopBar extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: textTertiary,
+                      color: palette.muted,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -69,7 +70,7 @@ class ReaderTopBar extends StatelessWidget {
             IconButton(
               tooltip: 'Ещё',
               onPressed: onMenu,
-              icon: Icon(Icons.more_vert, color: textPrimary),
+              icon: Icon(Icons.more_vert, color: palette.text),
             ),
           ],
         ),

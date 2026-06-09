@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:bookish_corner/core/di/app_preferences_provider.dart';
 import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/library/domain/book_format.dart';
@@ -29,16 +31,23 @@ final _epubBook = Book(
   addedAt: DateTime(2026),
 );
 
-/// Прокачивает event loop, чтобы доставить асинхронные эмиссии broadcast-стрима
-/// и резолв `await engine.open()`.
-Future<void> pump() => .delayed(.zero);
+/// Прокачивает event loop: два цикла, чтобы дать Riverpod время завершить
+/// rebuild-цепочку (stream → providerUpdate → build → _open → open.future).
+Future<void> pump() async {
+  await Future.delayed(.zero);
+  await Future.delayed(.zero);
+}
 
 /// Собирает контейнер с фейком-движком, возвращающим epub-книгу из
 /// readerBookProvider. Тип epub → readerEngineFactoryProvider возвращает
 /// FakeReaderEngine, но мы переопределяем фабрику на recording-движок.
-ProviderContainer _makeContainer(_RecordingEngine engine) {
+ProviderContainer _makeContainer(
+  _RecordingEngine engine,
+  SharedPreferences prefs,
+) {
   final container = ProviderContainer(
     overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
       readerBookProvider.overrideWith((ref, bookId) => Stream.value(_epubBook)),
       readerEngineFactoryProvider.overrideWith(
         (ref) =>
@@ -53,13 +62,17 @@ ProviderContainer _makeContainer(_RecordingEngine engine) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('ReaderController', () {
     late ProviderContainer container;
     late _RecordingEngine engine;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
       engine = _RecordingEngine();
-      container = _makeContainer(engine);
+      container = _makeContainer(engine, prefs);
     });
 
     ReaderUiState state() => container.read(readerControllerProvider(_bookId));
@@ -114,20 +127,28 @@ void main() {
     test('updateSettings немедленно отражается в состоянии', () async {
       await pump();
 
-      const next = ReaderSettings(fontSizeStep: 3, lineHeight: 1.8);
+      const next = ReaderSettings(fontSizeStep: 3, lineSpacingStep: 2);
       await notifier().updateSettings(next);
 
       expect(state().settings.fontSizeStep, equals(3));
-      expect(state().settings.lineHeight, equals(1.8));
+      expect(state().settings.lineSpacingStep, equals(2));
     });
   });
 
   group('readerEngineFactoryProvider seam', () {
+    late SharedPreferences seamPrefs;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      seamPrefs = await SharedPreferences.getInstance();
+    });
+
     test('остаётся в loading, пока open() движка не завершён', () async {
       final gate = Completer<void>();
       final engine = _RecordingEngine(openGate: gate);
       final container = ProviderContainer(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(seamPrefs),
           readerBookProvider.overrideWith(
             (ref, bookId) => Stream.value(_epubBook),
           ),
@@ -165,6 +186,7 @@ void main() {
         final bookCtrl = StreamController<Book?>.broadcast();
         final container = ProviderContainer(
           overrides: [
+            sharedPreferencesProvider.overrideWithValue(seamPrefs),
             readerBookProvider.overrideWith((ref, bookId) => bookCtrl.stream),
             readerEngineFactoryProvider.overrideWith(
               (ref) =>
@@ -217,6 +239,7 @@ void main() {
         final engine = _RecordingEngine();
         final container = ProviderContainer(
           overrides: [
+            sharedPreferencesProvider.overrideWithValue(seamPrefs),
             readerBookProvider.overrideWith(
               (ref, bookId) => Stream.value(_epubBook),
             ),

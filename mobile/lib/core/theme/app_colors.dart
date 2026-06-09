@@ -18,12 +18,16 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.error,
     required this.readerWhiteBg,
     required this.readerWhiteText,
+    required this.readerWhiteMuted,
     required this.readerSepiaBg,
     required this.readerSepiaText,
+    required this.readerSepiaMuted,
     required this.readerGrayBg,
     required this.readerGrayText,
+    required this.readerGrayMuted,
     required this.readerBlackBg,
     required this.readerBlackText,
+    required this.readerBlackMuted,
   });
 
   final Color bg;
@@ -40,16 +44,21 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color success;
   final Color error;
 
-  /// Явные фоны/текст ридера (white/sepia/gray/black). «system» резолвится как
-  /// [bg]/[textPrimary] текущей темы.
+  /// Фиксированные палитры ридера (bg/text/muted). Одинаковые в dark и light —
+  /// независимы от app-темы. Авто-тема резолвится через [ReaderPalette.resolve]
+  /// как bg/textPrimary/textTertiary текущей app-темы.
   final Color readerWhiteBg;
   final Color readerWhiteText;
+  final Color readerWhiteMuted;
   final Color readerSepiaBg;
   final Color readerSepiaText;
+  final Color readerSepiaMuted;
   final Color readerGrayBg;
   final Color readerGrayText;
+  final Color readerGrayMuted;
   final Color readerBlackBg;
   final Color readerBlackText;
+  final Color readerBlackMuted;
 
   static const dark = AppColors(
     bg: Color(0xFF090A0B),
@@ -66,13 +75,17 @@ class AppColors extends ThemeExtension<AppColors> {
     success: Color(0xFF4E9F6E),
     error: Color(0xFFE04F4F),
     readerWhiteBg: Color(0xFFFFFFFF),
-    readerWhiteText: Color(0xFF171717),
-    readerSepiaBg: Color(0xFFF5ECD7),
-    readerSepiaText: Color(0xFF3B2E1A),
-    readerGrayBg: Color(0xFF2C2C2E),
-    readerGrayText: Color(0xFFE5E5EA),
-    readerBlackBg: Color(0xFF000000),
-    readerBlackText: Color(0xFFE5E5EA),
+    readerWhiteText: Color(0xFF2D2D2D),
+    readerWhiteMuted: Color(0xFF969696),
+    readerSepiaBg: Color(0xFFFBF4E2),
+    readerSepiaText: Color(0xFF59391F),
+    readerSepiaMuted: Color(0xFFA89785),
+    readerGrayBg: Color(0xFF4B4B4B),
+    readerGrayText: Color(0xFFE3E3E3),
+    readerGrayMuted: Color(0xFF969696),
+    readerBlackBg: Color(0xFF010101),
+    readerBlackText: Color(0xFFC2C2C2),
+    readerBlackMuted: Color(0xFF616161),
   );
 
   static const light = AppColors(
@@ -90,13 +103,17 @@ class AppColors extends ThemeExtension<AppColors> {
     success: Color(0xFF4E9F6E),
     error: Color(0xFFE04F4F),
     readerWhiteBg: Color(0xFFFFFFFF),
-    readerWhiteText: Color(0xFF171717),
-    readerSepiaBg: Color(0xFFF5ECD7),
-    readerSepiaText: Color(0xFF3B2E1A),
-    readerGrayBg: Color(0xFFE5E5EA),
-    readerGrayText: Color(0xFF1C1C1E),
-    readerBlackBg: Color(0xFF000000),
-    readerBlackText: Color(0xFFE5E5EA),
+    readerWhiteText: Color(0xFF2D2D2D),
+    readerWhiteMuted: Color(0xFF969696),
+    readerSepiaBg: Color(0xFFFBF4E2),
+    readerSepiaText: Color(0xFF59391F),
+    readerSepiaMuted: Color(0xFFA89785),
+    readerGrayBg: Color(0xFF4B4B4B),
+    readerGrayText: Color(0xFFE3E3E3),
+    readerGrayMuted: Color(0xFF969696),
+    readerBlackBg: Color(0xFF010101),
+    readerBlackText: Color(0xFFC2C2C2),
+    readerBlackMuted: Color(0xFF616161),
   );
 
   @override
@@ -116,12 +133,16 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? error,
     Color? readerWhiteBg,
     Color? readerWhiteText,
+    Color? readerWhiteMuted,
     Color? readerSepiaBg,
     Color? readerSepiaText,
+    Color? readerSepiaMuted,
     Color? readerGrayBg,
     Color? readerGrayText,
+    Color? readerGrayMuted,
     Color? readerBlackBg,
     Color? readerBlackText,
+    Color? readerBlackMuted,
   }) {
     return AppColors(
       bg: bg ?? this.bg,
@@ -139,12 +160,16 @@ class AppColors extends ThemeExtension<AppColors> {
       error: error ?? this.error,
       readerWhiteBg: readerWhiteBg ?? this.readerWhiteBg,
       readerWhiteText: readerWhiteText ?? this.readerWhiteText,
+      readerWhiteMuted: readerWhiteMuted ?? this.readerWhiteMuted,
       readerSepiaBg: readerSepiaBg ?? this.readerSepiaBg,
       readerSepiaText: readerSepiaText ?? this.readerSepiaText,
+      readerSepiaMuted: readerSepiaMuted ?? this.readerSepiaMuted,
       readerGrayBg: readerGrayBg ?? this.readerGrayBg,
       readerGrayText: readerGrayText ?? this.readerGrayText,
+      readerGrayMuted: readerGrayMuted ?? this.readerGrayMuted,
       readerBlackBg: readerBlackBg ?? this.readerBlackBg,
       readerBlackText: readerBlackText ?? this.readerBlackText,
+      readerBlackMuted: readerBlackMuted ?? this.readerBlackMuted,
     );
   }
 
@@ -167,12 +192,16 @@ class AppColors extends ThemeExtension<AppColors> {
       :error,
       :readerWhiteBg,
       :readerWhiteText,
+      :readerWhiteMuted,
       :readerSepiaBg,
       :readerSepiaText,
+      :readerSepiaMuted,
       :readerGrayBg,
       :readerGrayText,
+      :readerGrayMuted,
       :readerBlackBg,
       :readerBlackText,
+      :readerBlackMuted,
     ) = other;
     return AppColors(
       bg: Color.lerp(this.bg, bg, t)!,
@@ -190,12 +219,16 @@ class AppColors extends ThemeExtension<AppColors> {
       error: Color.lerp(this.error, error, t)!,
       readerWhiteBg: Color.lerp(this.readerWhiteBg, readerWhiteBg, t)!,
       readerWhiteText: Color.lerp(this.readerWhiteText, readerWhiteText, t)!,
+      readerWhiteMuted: Color.lerp(this.readerWhiteMuted, readerWhiteMuted, t)!,
       readerSepiaBg: Color.lerp(this.readerSepiaBg, readerSepiaBg, t)!,
       readerSepiaText: Color.lerp(this.readerSepiaText, readerSepiaText, t)!,
+      readerSepiaMuted: Color.lerp(this.readerSepiaMuted, readerSepiaMuted, t)!,
       readerGrayBg: Color.lerp(this.readerGrayBg, readerGrayBg, t)!,
       readerGrayText: Color.lerp(this.readerGrayText, readerGrayText, t)!,
+      readerGrayMuted: Color.lerp(this.readerGrayMuted, readerGrayMuted, t)!,
       readerBlackBg: Color.lerp(this.readerBlackBg, readerBlackBg, t)!,
       readerBlackText: Color.lerp(this.readerBlackText, readerBlackText, t)!,
+      readerBlackMuted: Color.lerp(this.readerBlackMuted, readerBlackMuted, t)!,
     );
   }
 }

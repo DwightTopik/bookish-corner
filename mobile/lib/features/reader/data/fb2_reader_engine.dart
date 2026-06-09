@@ -207,10 +207,19 @@ class Fb2ReaderEngine implements ReaderEngine {
 
   @override
   Future<void> applySettings(ReaderSettings settings) async {
+    final ReaderSettings prev = _settings;
     _settings = settings;
-    // Реальная ре-вёрстка — B1b; здесь только сигнал вьюхе через контроллер.
-    _render.relayout();
+    if (_needsRelayout(prev, settings)) _render.relayout();
   }
+
+  /// Только изменения, влияющие на metrics текста, требуют повторной вёрстки.
+  /// Смена фона/яркости — repaint без relayout.
+  bool _needsRelayout(ReaderSettings a, ReaderSettings b) =>
+      a.fontSizeStep != b.fontSizeStep ||
+      a.fontFamily != b.fontFamily ||
+      a.marginStep != b.marginStep ||
+      a.textAlign != b.textAlign ||
+      a.lineSpacingStep != b.lineSpacingStep;
 
   // --- Внутреннее ---------------------------------------------------------
 

@@ -24,6 +24,7 @@ class _TextTheme {
     required this.textAlign,
     required this.bodyColor,
     required this.bgColor,
+    required this.fontFamilyName,
   });
 
   final double bodySize;
@@ -32,15 +33,24 @@ class _TextTheme {
   final TextAlign textAlign;
   final Color bodyColor;
   final Color bgColor;
+  // null → system sans-serif ('Default')
+  final String? fontFamilyName;
 
-  static const List<String> _serifFallback = ['Georgia', 'Times New Roman', 'serif'];
+  static String? _fontFamilyFor(String key) => switch (key) {
+    'Roboto'   => 'Roboto',
+    'PTSerif'  => 'PT Serif',
+    'PTSans'   => 'PT Sans',
+    'Playfair' => 'Playfair Display',
+    _          => null,
+  };
 
   static _TextTheme resolve(ReaderSettings s, AppColors colors) {
     final ReaderSettings(
       :background,
       :fontSizeStep,
-      :lineHeight,
+      :lineSpacingStep,
       :textAlign,
+      :fontFamily,
     ) = s;
     final AppColors(
       :bg,
@@ -65,30 +75,33 @@ class _TextTheme {
     return _TextTheme(
       bodySize: bodySize,
       headingSize: bodySize * AppDimensions.readerHeadingScale,
-      lineHeight: lineHeight,
+      lineHeight: AppDimensions.readerLineHeight(lineSpacingStep),
       textAlign: textAlign == .justify ? TextAlign.justify : TextAlign.left,
       bodyColor: textColor,
       bgColor: bgColor,
+      fontFamilyName: _fontFamilyFor(fontFamily),
     );
   }
 
   TextStyle get bodyStyle => .new(
-    fontFamilyFallback: _serifFallback,
+    fontFamily: fontFamilyName,
     fontSize: bodySize,
     height: lineHeight,
     color: bodyColor,
   );
 
   TextStyle get headingStyle => .new(
-    fontFamilyFallback: _serifFallback,
+    fontFamily: fontFamilyName,
     fontSize: headingSize,
     height: lineHeight,
     fontWeight: FontWeight.w700,
     color: bodyColor,
   );
 
+  // bgColor/bodyColor намеренно исключены: смена фона → repaint без relayout.
+  // fontFamilyName добавлен: смена шрифта требует новой вёрстки.
   int get settingsHash =>
-      Object.hash(bodySize, headingSize, lineHeight, textAlign, bgColor, bodyColor);
+      Object.hash(bodySize, headingSize, lineHeight, textAlign, fontFamilyName);
 }
 
 // ───────────────────────────── Пагинатор главы ──────────────────────────────
@@ -161,11 +174,14 @@ class _LayoutKey {
 }
 
 class _ChapterLayout {
-  _ChapterLayout({required this.pages, required this.painterList});
+  _ChapterLayout({required this.pages, required this.painterList, required this.bodyColor});
 
   final List<_PageLayout> pages;
   // Держим painters живыми, пока canvas их рисует.
   final List<TextPainter> painterList;
+  // Sentinel для eviction при смене цвета: settingsHash намеренно не включает
+  // цвет (repaint без relayout), поэтому сравниваем здесь.
+  final Color bodyColor;
 
   int get pageCount => pages.length;
 
@@ -345,6 +361,7 @@ _ChapterLayout _layoutChapter(
   return _ChapterLayout(
     pages: resultPages,
     painterList: builtPainters.whereType<TextPainter>().toList(),
+    bodyColor: theme.bodyColor,
   );
 }
 
@@ -423,7 +440,7 @@ class _PagePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_PagePainter old) =>
-      old.units.length != units.length ||
+      !identical(old.units, units) ||
       old.contentWidth != contentWidth ||
       old.hMargin != hMargin ||
       old.vMargin != vMargin;
@@ -532,6 +549,14 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
     final _ChapterLayout? layout = _layout;
     if (layout == null) return;
 
+    // No-op at the last page of the last chapter — prevents infinite slide.
+    final List<ReaderChapter> chapters =
+        _engine?.document.chapters ?? const <ReaderChapter>[];
+    if (_localPage >= layout.pageCount - 1 &&
+        _chapterIndex >= chapters.length - 1) {
+      return;
+    }
+
     // Захватить уходящую страницу ДО setState.
     final List<_PageItem> outgoing =
         layout.pages.elementAtOrNull(_localPage)?.units ?? const [];
@@ -569,6 +594,8 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
 
   void _onPrev() {
     if (!mounted) return;
+    // No-op at the first page of the first chapter — prevents infinite slide.
+    if (_localPage == 0 && _chapterIndex == 0) return;
     // Захватить уходящую страницу ДО setState.
     final List<_PageItem> outgoing =
         _layout?.pages.elementAtOrNull(_localPage)?.units ?? const [];
@@ -646,8 +673,18 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
     if (doc.chapters.isEmpty) return null;
     final int ci = _chapterIndex.clamp(0, doc.chapters.length - 1);
     final ReaderChapter chapter = doc.chapters[ci];
-    final _TextTheme theme = _TextTheme.resolve(engine.settings, context.appColors);
+    final _TextTheme theme = _TextTheme.resolve(
+      ref.read(readerControllerProvider(widget.bookId)).settings,
+      context.appColors,
+    );
     final _LayoutKey key = _LayoutKey(ci, _contentWidth.round(), theme.settingsHash);
+    // Evict stale entry when bodyColor changed but settingsHash is the same.
+    // settingsHash excludes color intentionally (theme change = repaint, not relayout);
+    // however the cached TextPainter has the old color baked in — must rebuild.
+    final _ChapterLayout? cached = _cache[key];
+    if (cached != null && cached.bodyColor != theme.bodyColor) {
+      _cache.remove(key);
+    }
     final _ChapterLayout layout = _cache.putIfAbsent(
       key,
       () => _layoutChapter(

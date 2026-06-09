@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:bookish_corner/core/constants/app_dimensions.dart';
-import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/features/reader/domain/reader_palette.dart';
 
 /// Приглушённый футер иммерсивного режима (`chromeVisible == false`): тонкий
 /// «N из M» по центру снизу, в [SafeArea]. Больше ничего на экране нет.
@@ -10,14 +10,15 @@ class ReaderImmersiveFooter extends StatelessWidget {
     super.key,
     required this.currentPage,
     required this.totalPages,
+    required this.palette,
   });
 
   final int currentPage;
   final int totalPages;
+  final ReaderPalette palette;
 
   @override
   Widget build(BuildContext context) {
-    final textSecondary = context.appColors.textSecondary;
     return SafeArea(
       child: Padding(
         padding: const .only(
@@ -27,7 +28,7 @@ class ReaderImmersiveFooter extends StatelessWidget {
           '$currentPage из $totalPages',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: textSecondary.withValues(alpha: 0.6),
+            color: palette.muted.withValues(alpha: 0.8),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),

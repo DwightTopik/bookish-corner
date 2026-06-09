@@ -9,6 +9,7 @@ import 'package:bookish_corner/features/reader/domain/reader_progress.dart';
 import 'package:bookish_corner/features/reader/domain/reader_selection.dart';
 import 'package:bookish_corner/features/reader/domain/reader_settings.dart';
 import 'package:bookish_corner/features/reader/domain/toc_entry.dart';
+import 'package:bookish_corner/features/reader/presentation/providers/reader_settings_provider.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_ui_state.dart';
 
 /// Контроллер экрана ридера. Family по `bookId`, авто-dispose при уходе с
@@ -66,7 +67,11 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
     _selectionSub = engine.selection.listen(_onSelection);
     ref.onDispose(_cancelSubs);
     unawaited(_open(engine));
-    _last = const ReaderUiState();
+    // Инициализируем настройки из глобального хранилища при первой привязке.
+    final savedSettings = ref.read(readerSettingsProvider);
+    _last = const ReaderUiState(settings: ReaderSettings()).copyWith(
+      settings: savedSettings,
+    );
     return _last;
   }
 
@@ -107,6 +112,7 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
 
   Future<void> updateSettings(ReaderSettings settings) async {
     _set(_last.copyWith(settings: settings));
+    unawaited(ref.read(readerSettingsProvider.notifier).save(settings));
     await _engine?.applySettings(settings);
   }
 

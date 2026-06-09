@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:bookish_corner/core/constants/app_dimensions.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
+import 'package:bookish_corner/features/reader/domain/reader_palette.dart';
+import 'package:bookish_corner/features/reader/domain/reader_settings.dart';
+
 import 'package:bookish_corner/features/reader/presentation/providers/reader_book_provider.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_controller.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_ui_state.dart';
@@ -12,6 +15,7 @@ import 'package:bookish_corner/features/reader/presentation/widgets/reader_botto
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_gesture_layer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_immersive_footer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_chapters_sheet.dart';
+import 'package:bookish_corner/features/reader/presentation/widgets/reader_settings_sheet.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_toolbar.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_top_bar.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_view.dart';
@@ -96,19 +100,36 @@ class _ReaderReadyView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bg = context.appColors.bg;
+    final ReaderSettings(:background, :useSystemBrightness, :brightness) =
+        state.settings;
+    final palette = ReaderPalette.resolve(background, context.appColors);
     final chromeVisible = state.chromeVisible;
+    final dimOpacity = useSystemBrightness
+        ? 0.0
+        : (1.0 - (brightness ?? 1.0)).clamp(0.0, 0.8);
     final progress = state.progress;
     final currentPage = progress?.currentPage ?? 1;
     final totalPages = progress?.totalPages ?? 1;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: palette.bg,
       body: Stack(
         children: [
           // Слой 0 — поверхность рендера.
           Positioned.fill(child: ReaderView(bookId: bookId)),
-          // Слой 1 — прозрачные жесты (всегда активны, под панелями).
+          // Слой 1 — затемнение (dim overlay), управляется ползунком яркости.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                duration: const Duration(
+                  milliseconds: AppDimensions.readerDimAnimMs,
+                ),
+                opacity: dimOpacity,
+                child: const ColoredBox(color: Colors.black),
+              ),
+            ),
+          ),
+          // Слой 2 — прозрачные жесты (всегда активны, под панелями).
           Positioned.fill(
             child: ReaderGestureLayer(
               onPrev: () => _notifier(ref).prevPage(),
@@ -127,6 +148,7 @@ class _ReaderReadyView extends ConsumerWidget {
               child: ReaderImmersiveFooter(
                 currentPage: currentPage,
                 totalPages: totalPages,
+                palette: palette,
               ),
             ),
           ),
@@ -139,6 +161,7 @@ class _ReaderReadyView extends ConsumerWidget {
               child: ReaderTopBar(
                 title: book.title,
                 author: book.author,
+                palette: palette,
                 onClose: () => context.pop(),
                 onMenu: () {}, // D4: sheet «О книге / Поиск / Прочитано».
               ),
@@ -151,12 +174,13 @@ class _ReaderReadyView extends ConsumerWidget {
               visible: chromeVisible,
               slideFrom: const Offset(0, 1),
               child: DecoratedBox(
-                decoration: BoxDecoration(color: bg.withValues(alpha: 0.92)),
+                decoration: BoxDecoration(color: palette.bg),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ReaderBottomPanel(
                       state: state,
+                      palette: palette,
                       onSeek: (value) => _notifier(ref).seekTo(value),
                       onBack: () {}, // D6: undo навигации.
                       onForward: () {}, // D6: redo навигации.
@@ -164,10 +188,11 @@ class _ReaderReadyView extends ConsumerWidget {
                     ReaderToolbar(
                       isBookmarked: state.isBookmarked,
                       hasAudioVersion: _hasAudioVersion,
+                      palette: palette,
                       onChapters: () => showReaderChaptersSheet(context, bookId),
                       onNotebook: () {}, // E: экран блокнота.
                       onListen: () {}, // связанная аудиоверсия.
-                      onSettings: () {}, // B3: sheet настроек.
+                      onSettings: () => showReaderSettingsSheet(context, bookId),
                       onBookmark: () {}, // D2: тоггл закладки.
                     ),
                   ],
