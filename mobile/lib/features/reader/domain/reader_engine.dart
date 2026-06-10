@@ -45,4 +45,8 @@ abstract class ReaderEngine {
   Future<List<ReaderSearchResult>> search(String query);
 
   Future<void> applySettings(ReaderSettings settings);
+
+  /// Первые ~60 символов plain-text текущей страницы без разметки.
+  /// Возвращает '' если движок или позиция недоступны.
+  String currentPagePreview() => '';
 }

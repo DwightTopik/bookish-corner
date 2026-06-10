@@ -193,7 +193,7 @@ class _ReaderReadyView extends ConsumerWidget {
                       onNotebook: () {}, // E: экран блокнота.
                       onListen: () {}, // связанная аудиоверсия.
                       onSettings: () => showReaderSettingsSheet(context, bookId),
-                      onBookmark: () {}, // D2: тоггл закладки.
+                      onBookmark: () => _notifier(ref).toggleBookmark(),
                     ),
                   ],
                 ),

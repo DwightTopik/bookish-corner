@@ -206,6 +206,20 @@ class Fb2ReaderEngine implements ReaderEngine {
   }
 
   @override
+  String currentPagePreview() {
+    final ci = _render.chapterIndex;
+    final co = _render.charOffset;
+    if (ci == null || co == null) return '';
+    final chapters = _document.chapters;
+    if (ci >= chapters.length) return '';
+    final text = chapters[ci].plainText;
+    if (text.isEmpty) return '';
+    final start = co.clamp(0, text.length);
+    final end = (co + 60).clamp(start, text.length);
+    return text.substring(start, end);
+  }
+
+  @override
   Future<void> applySettings(ReaderSettings settings) async {
     final ReaderSettings prev = _settings;
     _settings = settings;

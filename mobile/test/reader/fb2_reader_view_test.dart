@@ -5,11 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:bookish_corner/core/constants/app_dimensions.dart';
+import 'package:bookish_corner/core/di/app_preferences_provider.dart';
 import 'package:bookish_corner/core/di/reader_providers.dart';
+import 'package:bookish_corner/core/di/repository_providers.dart';
 import 'package:bookish_corner/core/theme/app_theme.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/reader/data/fb2_reader_engine.dart';
+import 'package:bookish_corner/features/reader/domain/reader_bookmark.dart';
+import 'package:bookish_corner/features/reader/domain/reader_bookmark_repository.dart';
 import 'package:bookish_corner/features/reader/domain/reader_locator.dart';
 import 'package:bookish_corner/features/reader/domain/reader_settings.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_book_provider.dart';
@@ -59,12 +65,16 @@ Future<(ProviderContainer, Fb2ReaderEngine)> _pumpView(
     addedAt: DateTime(2026),
   );
 
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+
   final container = ProviderContainer(
     overrides: [
-      readerBookProvider.overrideWith((ref, _) => Stream.value(book)),
-      readerEngineFactoryProvider.overrideWith(
-        (ref) =>
-            (_) => engine,
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      readerBookProvider.overrideWith((ref, _) => .value(book)),
+      readerEngineFactoryProvider.overrideWith((ref) => (_) => engine),
+      readerBookmarkRepositoryProvider.overrideWith(
+        (ref) => _StubBookmarkRepository(),
       ),
     ],
   );
@@ -265,4 +275,19 @@ void main() {
     // Не должно быть ни одной running-анимации.
     expect(tester.hasRunningAnimations, isFalse);
   });
+}
+
+class _StubBookmarkRepository implements ReaderBookmarkRepository {
+  @override
+  Stream<List<ReaderBookmark>> watchBookmarks(String bookId) =>
+      .value(const <ReaderBookmark>[]);
+
+  @override
+  Future<bool> isBookmarked(String bookId, int charOffset) async => false;
+
+  @override
+  Future<void> addBookmark(ReaderBookmark bookmark) async {}
+
+  @override
+  Future<void> removeBookmark(String id) async {}
 }

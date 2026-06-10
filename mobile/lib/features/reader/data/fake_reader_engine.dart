@@ -178,6 +178,9 @@ class FakeReaderEngine implements ReaderEngine {
   }
 
   @override
+  String currentPagePreview() => '';
+
+  @override
   Future<void> applySettings(ReaderSettings settings) async {
     // Фейк ничего не рендерит — chrome-тестам важен сам факт делегирования.
   }

@@ -67,11 +67,11 @@ class ReaderToolbar extends StatelessWidget {
               iconColor: palette.muted,
               onTap: onSettings,
             ),
-            _ToolbarAction(
-              icon: isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-              tooltip: 'Закладка',
+            _AnimatedBookmarkButton(
+              isBookmarked: isBookmarked,
+              activeColor: like,
+              inactiveColor: palette.muted,
               onTap: onBookmark,
-              iconColor: isBookmarked ? like : palette.muted,
             ),
           ],
         ),
@@ -104,6 +104,40 @@ class _ToolbarAction extends StatelessWidget {
           icon,
           color: iconColor,
           size: AppDimensions.readerToolbarIconSize,
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedBookmarkButton extends StatelessWidget {
+  const _AnimatedBookmarkButton({
+    required this.isBookmarked,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  final bool isBookmarked;
+  final Color activeColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkResponse(
+      onTap: onTap,
+      radius: 32,
+      child: Tooltip(
+        message: 'Закладка',
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 150),
+          child: Icon(
+            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+            key: ValueKey(isBookmarked),
+            color: isBookmarked ? activeColor : inactiveColor,
+            size: AppDimensions.readerToolbarIconSize,
+          ),
         ),
       ),
     );

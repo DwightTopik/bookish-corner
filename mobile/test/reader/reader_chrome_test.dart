@@ -4,10 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:bookish_corner/core/di/app_preferences_provider.dart';
 import 'package:bookish_corner/core/di/reader_providers.dart';
+import 'package:bookish_corner/core/di/repository_providers.dart';
 import 'package:bookish_corner/core/theme/app_theme.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/library/domain/book_format.dart';
+import 'package:bookish_corner/features/reader/domain/reader_bookmark.dart';
+import 'package:bookish_corner/features/reader/domain/reader_bookmark_repository.dart';
 import 'package:bookish_corner/features/reader/domain/reader_capabilities.dart';
 import 'package:bookish_corner/features/reader/domain/reader_engine.dart';
 import 'package:bookish_corner/features/reader/domain/reader_locator.dart';
@@ -38,10 +44,16 @@ Future<ProviderContainer> _pumpReader(
   WidgetTester tester,
   _RecordingEngine engine,
 ) async {
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
   final container = ProviderContainer(
     overrides: [
-      readerBookProvider.overrideWith((ref, bookId) => Stream.value(_book)),
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      readerBookProvider.overrideWith((ref, bookId) => .value(_book)),
       readerEngineFactoryProvider.overrideWith((ref) => (_) => engine),
+      readerBookmarkRepositoryProvider.overrideWith(
+        (ref) => _StubBookmarkRepository(),
+      ),
     ],
   );
   addTearDown(container.dispose);
@@ -193,5 +205,23 @@ class _RecordingEngine implements ReaderEngine {
   Future<List<ReaderSearchResult>> search(String query) async => const [];
 
   @override
+  String currentPagePreview() => '';
+
+  @override
   Future<void> applySettings(ReaderSettings settings) async {}
+}
+
+class _StubBookmarkRepository implements ReaderBookmarkRepository {
+  @override
+  Stream<List<ReaderBookmark>> watchBookmarks(String bookId) =>
+      .value(const <ReaderBookmark>[]);
+
+  @override
+  Future<bool> isBookmarked(String bookId, int charOffset) async => false;
+
+  @override
+  Future<void> addBookmark(ReaderBookmark bookmark) async {}
+
+  @override
+  Future<void> removeBookmark(String id) async {}
 }
