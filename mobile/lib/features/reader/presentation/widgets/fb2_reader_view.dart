@@ -8,6 +8,7 @@ import 'package:bookish_corner/core/constants/app_dimensions.dart';
 import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
 import 'package:bookish_corner/features/reader/data/document/reader_document.dart';
+import 'package:bookish_corner/features/reader/data/fb2_page_geometry.dart';
 import 'package:bookish_corner/features/reader/data/fb2_reader_engine.dart';
 import 'package:bookish_corner/features/reader/data/fb2_render_controller.dart';
 import 'package:bookish_corner/features/reader/domain/reader_engine.dart';
@@ -123,12 +124,15 @@ class _TextLineItem extends _PageItem {
     required super.yOnPage,
     required this.lineMetrics,
     required this.isFirstLineOfBlock,
+    required this.blockPlainStart,
   });
 
   final TextPainter painter;
   final int lineIndex;
   final List<LineMetrics> lineMetrics;
   final bool isFirstLineOfBlock;
+  /// Символьный старт блока в `ReaderChapter.plainText`.
+  final int blockPlainStart;
 }
 
 /// Блочная картинка как единый атом: вписана по ширине (или по высоте, если
@@ -344,6 +348,7 @@ _ChapterLayout _layoutChapter(
         yOnPage: currentY + spacing,
         lineMetrics: metrics,
         isFirstLineOfBlock: isFirstLine,
+        blockPlainStart: plainStart,
       ));
       currentY += spacing + lineH;
     }
@@ -473,6 +478,11 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   double _hMargin = 0;
   double _vMargin = 0;
 
+  /// Верхний safe-area inset. Рендер кладёт контент в `vMargin + padding.top`
+  /// (canvas.translate), поэтому геометрия выделения обязана зеркалить тот же
+  /// origin, иначе hit-test уезжает вниз на высоту статус-бара.
+  double _paddingTop = 0;
+
   // Не владеем dispose движка — им владеет readerEngineProvider через ref.onDispose.
   Fb2ReaderEngine? _engine;
   _ChapterLayout? _layout;
@@ -525,6 +535,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
     rc.onPrev = _onPrev;
     rc.onJump = _onJump;
     rc.onRelayout = _onRelayout;
+    rc.onGeometry = _buildGeometry;
   }
 
   void _unbindEngine() {
@@ -533,13 +544,51 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
       // Снимаем хук только если он всё ещё наш: при ре-маунте на стабильном
       // инстансе движка новая вью уже могла перепривязать хуки на себя — не
       // затираем её привязку.
-      final Fb2RenderController(:onNext, :onPrev, :onJump, :onRelayout) = rc;
+      final Fb2RenderController(:onNext, :onPrev, :onJump, :onRelayout, :onGeometry) = rc;
       if (onNext == _onNext) rc.onNext = null;
       if (onPrev == _onPrev) rc.onPrev = null;
       if (onJump == _onJump) rc.onJump = null;
       if (onRelayout == _onRelayout) rc.onRelayout = null;
+      if (onGeometry == _buildGeometry) rc.onGeometry = null;
     }
     _engine = null;
+  }
+
+  /// Строит [PageTextGeometry] из текущей страницы для шва выделения (D1).
+  PageTextGeometry? _buildGeometry() {
+    final _ChapterLayout? layout = _layout;
+    if (layout == null) return null;
+    final int page = _localPage.clamp(0, layout.pageCount - 1);
+    final List<_PageItem> units = layout.pages[page].units;
+
+    final lines = <PageLineDescriptor>[];
+    for (final item in units) {
+      if (item is! _TextLineItem) continue;
+      final _TextLineItem(
+        :painter,
+        :lineIndex,
+        :lineMetrics,
+        :yOnPage,
+        :blockPlainStart,
+        :isFirstLineOfBlock,
+      ) = item;
+      lines.add(PageLineDescriptor(
+        painter: painter,
+        lineIndex: lineIndex,
+        lineMetrics: lineMetrics,
+        yOnPage: yOnPage,
+        blockPlainStart: blockPlainStart,
+        isFirstLineOfBlock: isFirstLineOfBlock,
+        paragraphIndent: AppDimensions.readerParagraphIndent,
+      ));
+    }
+
+    return PageTextGeometry(
+      lines: lines,
+      hMargin: _hMargin,
+      vMargin: _vMargin + _paddingTop,
+      contentWidth: _contentWidth,
+    );
   }
 
   // ── Навигация ───────────────────────────────────────────────────────────
@@ -647,6 +696,8 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
   void _onRelayout() {
     if (!mounted) return;
     // Ре-вёрстка — мгновенно: останавливаем анимацию, если шла.
+    // Сбрасываем активное выделение — геометрия изменилась (шрифт/поля).
+    _engine?.renderController.onSelectionReset?.call();
     _animCtrl.stop();
     _outgoingUnits = null;
 
@@ -751,6 +802,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
               _layout?.pages.elementAtOrNull(_localPage)?.startCharOffset ?? 0;
           _hMargin = hMargin;
           _vMargin = vMargin;
+          _paddingTop = padding.top;
           _contentWidth = contentWidth;
           _pageHeight = pageHeight;
           _layout = null;

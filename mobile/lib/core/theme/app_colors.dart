@@ -28,6 +28,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.readerBlackBg,
     required this.readerBlackText,
     required this.readerBlackMuted,
+    required this.readerSelectionTint,
+    required this.readerSelectionHandle,
   });
 
   final Color bg;
@@ -60,6 +62,11 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color readerBlackText;
   final Color readerBlackMuted;
 
+  /// Токены выделения текста. Одинаковы для dark/light — читаемы на всех 5 фонах ридера.
+  /// Янтарный (#C9822B): не конфликтует с accent, контрастен на белом/сепии/сером/чёрном.
+  final Color readerSelectionTint;
+  final Color readerSelectionHandle;
+
   static const dark = AppColors(
     bg: Color(0xFF090A0B),
     surface: Color(0xFF121416),
@@ -86,6 +93,8 @@ class AppColors extends ThemeExtension<AppColors> {
     readerBlackBg: Color(0xFF010101),
     readerBlackText: Color(0xFFC2C2C2),
     readerBlackMuted: Color(0xFF616161),
+    readerSelectionTint: Color(0x40C9822B),
+    readerSelectionHandle: Color(0xFFC9822B),
   );
 
   static const light = AppColors(
@@ -114,6 +123,8 @@ class AppColors extends ThemeExtension<AppColors> {
     readerBlackBg: Color(0xFF010101),
     readerBlackText: Color(0xFFC2C2C2),
     readerBlackMuted: Color(0xFF616161),
+    readerSelectionTint: Color(0x40C9822B),
+    readerSelectionHandle: Color(0xFFC9822B),
   );
 
   @override
@@ -143,6 +154,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? readerBlackBg,
     Color? readerBlackText,
     Color? readerBlackMuted,
+    Color? readerSelectionTint,
+    Color? readerSelectionHandle,
   }) {
     return AppColors(
       bg: bg ?? this.bg,
@@ -170,6 +183,8 @@ class AppColors extends ThemeExtension<AppColors> {
       readerBlackBg: readerBlackBg ?? this.readerBlackBg,
       readerBlackText: readerBlackText ?? this.readerBlackText,
       readerBlackMuted: readerBlackMuted ?? this.readerBlackMuted,
+      readerSelectionTint: readerSelectionTint ?? this.readerSelectionTint,
+      readerSelectionHandle: readerSelectionHandle ?? this.readerSelectionHandle,
     );
   }
 
@@ -202,6 +217,8 @@ class AppColors extends ThemeExtension<AppColors> {
       :readerBlackBg,
       :readerBlackText,
       :readerBlackMuted,
+      :readerSelectionTint,
+      :readerSelectionHandle,
     ) = other;
     return AppColors(
       bg: Color.lerp(this.bg, bg, t)!,
@@ -229,6 +246,8 @@ class AppColors extends ThemeExtension<AppColors> {
       readerBlackBg: Color.lerp(this.readerBlackBg, readerBlackBg, t)!,
       readerBlackText: Color.lerp(this.readerBlackText, readerBlackText, t)!,
       readerBlackMuted: Color.lerp(this.readerBlackMuted, readerBlackMuted, t)!,
+      readerSelectionTint: Color.lerp(this.readerSelectionTint, readerSelectionTint, t)!,
+      readerSelectionHandle: Color.lerp(this.readerSelectionHandle, readerSelectionHandle, t)!,
     );
   }
 }

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bookish_corner/core/constants/app_dimensions.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
+import 'package:bookish_corner/core/widgets/measure_size.dart';
+import 'package:bookish_corner/features/reader/presentation/providers/reader_chrome_insets_provider.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
 import 'package:bookish_corner/features/reader/domain/reader_palette.dart';
 import 'package:bookish_corner/features/reader/domain/reader_settings.dart';
@@ -16,6 +18,7 @@ import 'package:bookish_corner/features/reader/presentation/widgets/reader_gestu
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_immersive_footer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_chapters_sheet.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_settings_sheet.dart';
+import 'package:bookish_corner/features/reader/presentation/widgets/reader_selection_layer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_toolbar.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_top_bar.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_view.dart';
@@ -137,6 +140,10 @@ class _ReaderReadyView extends ConsumerWidget {
               onToggle: () => _notifier(ref).toggleChrome(),
             ),
           ),
+          // Слой 3 — выделение текста (над gesture layer, под chrome-панелями).
+          Positioned.fill(
+            child: ReaderSelectionLayer(bookId: bookId),
+          ),
           // Иммерсивный футер — виден при скрытом chrome.
           Align(
             alignment: Alignment.bottomCenter,
@@ -158,12 +165,17 @@ class _ReaderReadyView extends ConsumerWidget {
             child: _ChromeOverlay(
               visible: chromeVisible,
               slideFrom: const Offset(0, -1),
-              child: ReaderTopBar(
-                title: book.title,
-                author: book.author,
-                palette: palette,
-                onClose: () => context.pop(),
-                onMenu: () {}, // D4: sheet «О книге / Поиск / Прочитано».
+              child: MeasureSize(
+                onChange: (size) => ref
+                    .read(readerChromeInsetsProvider(bookId).notifier)
+                    .setTopHeight(size.height),
+                child: ReaderTopBar(
+                  title: book.title,
+                  author: book.author,
+                  palette: palette,
+                  onClose: () => context.pop(),
+                  onMenu: () {}, // D4: sheet «О книге / Поиск / Прочитано».
+                ),
               ),
             ),
           ),
@@ -173,29 +185,36 @@ class _ReaderReadyView extends ConsumerWidget {
             child: _ChromeOverlay(
               visible: chromeVisible,
               slideFrom: const Offset(0, 1),
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: palette.bg),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ReaderBottomPanel(
-                      state: state,
-                      palette: palette,
-                      onSeek: (value) => _notifier(ref).seekTo(value),
-                      onBack: () {}, // D6: undo навигации.
-                      onForward: () {}, // D6: redo навигации.
-                    ),
-                    ReaderToolbar(
-                      isBookmarked: state.isBookmarked,
-                      hasAudioVersion: _hasAudioVersion,
-                      palette: palette,
-                      onChapters: () => showReaderChaptersSheet(context, bookId),
-                      onNotebook: () {}, // E: экран блокнота.
-                      onListen: () {}, // связанная аудиоверсия.
-                      onSettings: () => showReaderSettingsSheet(context, bookId),
-                      onBookmark: () => _notifier(ref).toggleBookmark(),
-                    ),
-                  ],
+              child: MeasureSize(
+                onChange: (size) => ref
+                    .read(readerChromeInsetsProvider(bookId).notifier)
+                    .setBottomHeight(size.height),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: palette.bg),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ReaderBottomPanel(
+                        state: state,
+                        palette: palette,
+                        onSeek: (value) => _notifier(ref).seekTo(value),
+                        onBack: () {}, // D6: undo навигации.
+                        onForward: () {}, // D6: redo навигации.
+                      ),
+                      ReaderToolbar(
+                        isBookmarked: state.isBookmarked,
+                        hasAudioVersion: _hasAudioVersion,
+                        palette: palette,
+                        onChapters: () =>
+                            showReaderChaptersSheet(context, bookId),
+                        onNotebook: () {}, // E: экран блокнота.
+                        onListen: () {}, // связанная аудиоверсия.
+                        onSettings: () =>
+                            showReaderSettingsSheet(context, bookId),
+                        onBookmark: () => _notifier(ref).toggleBookmark(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

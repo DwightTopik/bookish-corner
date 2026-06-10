@@ -1,4 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Offset, Rect;
+
+import 'package:bookish_corner/features/reader/data/fb2_page_geometry.dart';
 
 /// Точка двунаправленной связки движок↔вью для fb2/txt-ридера.
 ///
@@ -18,6 +21,9 @@ import 'package:flutter/foundation.dart';
 ///   страницу с этим offset через [jumpToOffset] → [onJump];
 /// - смена настроек: движок зовёт [relayout] → [onRelayout], вью
 ///   пере-пагинирует, сохраняя позицию.
+/// - геометрия выделения: вью выставляет [onGeometry]; [charOffsetAt],
+///   [wordRangeAt], [rectsForCharRange], [textForRange] делегируют в
+///   [PageTextGeometry] текущей страницы. Headless — возвращают null/[].
 ///
 /// Пока хуки не выставлены вьюхой (headless), [next]/[prev]/[jumpToOffset]/
 /// [relayout] — no-op, а позиционные/page-поля остаются `null`.
@@ -45,6 +51,14 @@ class Fb2RenderController extends ChangeNotifier {
   VoidCallback? onPrev;
   void Function(int chapterIndex, int charOffset)? onJump;
   VoidCallback? onRelayout;
+
+  /// Хук геометрии: вью выставляет геттер актуальной [PageTextGeometry]
+  /// текущей страницы. Пока `null` (headless) — все geometry-методы no-op.
+  PageTextGeometry? Function()? onGeometry;
+
+  /// Вызывается вью при _needsRelayout == true (смена шрифта/полей/etc).
+  /// Слой выделения подписывается и сбрасывает активное выделение.
+  VoidCallback? onSelectionReset;
 
   /// Вью сообщает движку актуальную позицию + page-метрики после вёрстки/смены
   /// страницы.
@@ -74,4 +88,22 @@ class Fb2RenderController extends ChangeNotifier {
 
   /// Применение `ReaderSettings`: вью пере-пагинирует, сохраняя позицию.
   void relayout() => onRelayout?.call();
+
+  // ── Геометрия текущей страницы (D1) ──────────────────────────────────────
+
+  /// Символьный offset в `ReaderChapter.plainText` для точки [screenPt].
+  /// `null` если вью не смонтирована (headless) или точка вне текста.
+  int? charOffsetAt(Offset screenPt) => onGeometry?.call()?.charOffsetAt(screenPt);
+
+  /// Диапазон слова вокруг точки [screenPt]. `null` headless или промах.
+  (int, int)? wordRangeAt(Offset screenPt) =>
+      onGeometry?.call()?.wordRangeAt(screenPt);
+
+  /// Прямоугольники (контентные координаты страницы) для диапазона символов.
+  List<Rect> rectsForCharRange(int charStart, int charEnd) =>
+      onGeometry?.call()?.rectsForCharRange(charStart, charEnd) ?? const [];
+
+  /// Текст для диапазона символов из текущей страницы.
+  String textForRange(int charStart, int charEnd) =>
+      onGeometry?.call()?.textForRange(charStart, charEnd) ?? '';
 }
