@@ -119,6 +119,8 @@ class ReaderAnnotations extends Table {
   IntColumn get chapterIndex => integer().nullable()();
   TextColumn get body => text()();
   TextColumn get noteText => text().nullable()();
+  // Ключ HighlightColor по .name; null → coral (дефолт для строк до v8).
+  TextColumn get color => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -139,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'bookish'));
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => .new(
@@ -166,6 +168,12 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(readerProgress);
         await m.createTable(readerBookmarks);
         await m.createTable(readerAnnotations);
+      }
+      if (from < 8) {
+        await m.addColumn(
+          readerAnnotations,
+          readerAnnotations.color as GeneratedColumn<Object>,
+        );
       }
     },
   );

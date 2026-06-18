@@ -1,5 +1,7 @@
 enum ReaderAnnotationType { quote, note }
 
+enum HighlightColor { coral, yellow, blue, teal, gray }
+
 class ReaderAnnotation {
   const ReaderAnnotation({
     required this.id,
@@ -10,6 +12,7 @@ class ReaderAnnotation {
     this.chapterIndex,
     required this.text,
     this.noteText,
+    required this.color,
     required this.createdAt,
   });
 
@@ -21,6 +24,7 @@ class ReaderAnnotation {
   final int? chapterIndex;
   final String text;
   final String? noteText;
+  final HighlightColor color;
   final DateTime createdAt;
 
   ReaderAnnotation copyWith({
@@ -32,6 +36,7 @@ class ReaderAnnotation {
     int? chapterIndex,
     String? text,
     String? noteText,
+    HighlightColor? color,
     DateTime? createdAt,
   }) {
     return ReaderAnnotation(
@@ -43,6 +48,7 @@ class ReaderAnnotation {
       chapterIndex: chapterIndex ?? this.chapterIndex,
       text: text ?? this.text,
       noteText: noteText ?? this.noteText,
+      color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
     );
   }

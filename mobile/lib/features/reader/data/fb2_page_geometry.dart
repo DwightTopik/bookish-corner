@@ -150,6 +150,62 @@ class PageTextGeometry {
     return (blockPlainStart + range.start, blockPlainStart + range.end);
   }
 
+  /// Горизонтальный отрезок диапазона на одной строке + вертикальные метрики.
+  /// Общий шов для [rectsForCharRange] (заливка) и [underlinesForCharRange]
+  /// (подчёркивание): первый строит полный rect, второй — тонкий у базовой линии.
+  ({
+    double left,
+    double right,
+    double yOnPage,
+    double lineHeight,
+    double baselineFromLineTop,
+  })? _lineSpan(PageLineDescriptor line, int charStart, int charEnd) {
+    final PageLineDescriptor(
+      :blockPlainStart,
+      :painter,
+      :yOnPage,
+      :_painterCharRange,
+      :_xOffset,
+      :_lineTop,
+      :lineHeight,
+      :lineIndex,
+      :lineMetrics,
+    ) = line;
+    final (int rangeStart, int rangeEnd) = _painterCharRange;
+    final int globalStart = blockPlainStart + rangeStart;
+    final int globalEnd = blockPlainStart + rangeEnd;
+
+    if (charEnd <= globalStart || charStart >= globalEnd) return null;
+
+    final int localStart = math.max(charStart, globalStart) - blockPlainStart;
+    final int localEnd = math.min(charEnd, globalEnd) - blockPlainStart;
+
+    final List<TextBox> boxes = painter.getBoxesForSelection(
+      TextSelection(baseOffset: localStart, extentOffset: localEnd),
+    );
+    if (boxes.isEmpty) return null;
+
+    double minLeft = .infinity;
+    double maxRight = .negativeInfinity;
+    for (final box in boxes) {
+      if (box.left < minLeft) minLeft = box.left;
+      if (box.right > maxRight) maxRight = box.right;
+    }
+
+    // baseline у LineMetrics отсчитывается от верха painter; _lineTop — верх
+    // этой строки в painter; их разница — базовая линия от верха строки.
+    final double baselineFromLineTop =
+        lineIndex < lineMetrics.length ? lineMetrics[lineIndex].baseline - _lineTop : 0;
+
+    return (
+      left: minLeft + _xOffset,
+      right: maxRight + _xOffset,
+      yOnPage: yOnPage,
+      lineHeight: lineHeight,
+      baselineFromLineTop: baselineFromLineTop,
+    );
+  }
+
   /// Список прямоугольников (контентные координаты) для диапазона
   /// `[charStart, charEnd)` в `ReaderChapter.plainText`.
   List<Rect> rectsForCharRange(int charStart, int charEnd) {
@@ -157,43 +213,39 @@ class PageTextGeometry {
     final List<Rect> result = <Rect>[];
 
     for (final line in lines) {
-      final PageLineDescriptor(
-        :blockPlainStart,
-        :painter,
-        :yOnPage,
-        :_painterCharRange,
-        :_xOffset,
-        :lineHeight,
-      ) = line;
-      final (int rangeStart, int rangeEnd) = _painterCharRange;
-      final int globalStart = blockPlainStart + rangeStart;
-      final int globalEnd = blockPlainStart + rangeEnd;
-
-      if (charEnd <= globalStart || charStart >= globalEnd) continue;
-
-      final int localStart = math.max(charStart, globalStart) - blockPlainStart;
-      final int localEnd = math.min(charEnd, globalEnd) - blockPlainStart;
-
-      final List<TextBox> boxes = painter.getBoxesForSelection(
-        TextSelection(baseOffset: localStart, extentOffset: localEnd),
-      );
-      if (boxes.isEmpty) continue;
-
+      final span = _lineSpan(line, charStart, charEnd);
+      if (span == null) continue;
       // Один прямоугольник на строку: горизонтальные края — из боксов, вертикаль
       // — ровно высота строки на странице. Так подсветки соседних строк не
       // перекрываются (иначе полупрозрачный тинт темнеет на стыках из-за leading).
-      double minLeft = .infinity;
-      double maxRight = .negativeInfinity;
-      for (final box in boxes) {
-        if (box.left < minLeft) minLeft = box.left;
-        if (box.right > maxRight) maxRight = box.right;
-      }
       result.add(Rect.fromLTRB(
-        minLeft + _xOffset,
-        yOnPage,
-        maxRight + _xOffset,
-        yOnPage + lineHeight,
+        span.left,
+        span.yOnPage,
+        span.right,
+        span.yOnPage + span.lineHeight,
       ));
+    }
+
+    return result;
+  }
+
+  /// Тонкие прямоугольники-подчёркивания у базовой линии каждой строки диапазона
+  /// (для аннотаций-заметок). [thickness] — высота линии, [gap] — отступ ниже
+  /// базовой линии.
+  List<Rect> underlinesForCharRange(
+    int charStart,
+    int charEnd, {
+    required double thickness,
+    required double gap,
+  }) {
+    if (charStart >= charEnd) return const [];
+    final List<Rect> result = <Rect>[];
+
+    for (final line in lines) {
+      final span = _lineSpan(line, charStart, charEnd);
+      if (span == null) continue;
+      final double top = span.yOnPage + span.baselineFromLineTop + gap;
+      result.add(Rect.fromLTRB(span.left, top, span.right, top + thickness));
     }
 
     return result;

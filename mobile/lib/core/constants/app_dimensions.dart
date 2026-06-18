@@ -121,6 +121,13 @@ class AppDimensions {
 
   static const int readerDimAnimMs = 100;
 
+  // Подчёркивание для аннотаций-заметок (note); цитаты — заливка.
+  static const double readerHighlightUnderlineThickness = 2.0;
+  static const double readerHighlightUnderlineGap = 1.5;
+
+  // Иконки в контекст-меню выделения/хайлайта.
+  static const double readerMenuIconSize = 20.0;
+
   static const double readerSettingsSectionGap = 20;
   static const double readerSettingsControlHeight = 48;
   static const double readerSettingsCompactIconSize = 18.0;

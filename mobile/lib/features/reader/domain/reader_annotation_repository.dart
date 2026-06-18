@@ -7,5 +7,6 @@ abstract class ReaderAnnotationRepository {
   });
   Future<void> addAnnotation(ReaderAnnotation annotation);
   Future<void> updateNote(String id, String noteText);
+  Future<void> updateColor(String id, HighlightColor color);
   Future<void> removeAnnotation(String id);
 }

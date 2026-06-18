@@ -30,6 +30,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.readerBlackMuted,
     required this.readerSelectionTint,
     required this.readerSelectionHandle,
+    required this.readerHighlightCoral,
+    required this.readerHighlightYellow,
+    required this.readerHighlightBlue,
+    required this.readerHighlightTeal,
+    required this.readerHighlightGray,
   });
 
   final Color bg;
@@ -67,6 +72,14 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color readerSelectionTint;
   final Color readerSelectionHandle;
 
+  /// Тинты хайлайтов (D1b). Полупрозрачные (~30%), читаемы поверх всех 5 reader-фонов.
+  /// Одинаковы для dark/light.
+  final Color readerHighlightCoral;
+  final Color readerHighlightYellow;
+  final Color readerHighlightBlue;
+  final Color readerHighlightTeal;
+  final Color readerHighlightGray;
+
   static const dark = AppColors(
     bg: Color(0xFF090A0B),
     surface: Color(0xFF121416),
@@ -95,6 +108,11 @@ class AppColors extends ThemeExtension<AppColors> {
     readerBlackMuted: Color(0xFF616161),
     readerSelectionTint: Color(0x40C9822B),
     readerSelectionHandle: Color(0xFFC9822B),
+    readerHighlightCoral: Color(0x4DE8806E),
+    readerHighlightYellow: Color(0x4DF2C94C),
+    readerHighlightBlue: Color(0x4D56CCF2),
+    readerHighlightTeal: Color(0x4D5FE0C0),
+    readerHighlightGray: Color(0x4DBDBDBD),
   );
 
   static const light = AppColors(
@@ -125,6 +143,11 @@ class AppColors extends ThemeExtension<AppColors> {
     readerBlackMuted: Color(0xFF616161),
     readerSelectionTint: Color(0x40C9822B),
     readerSelectionHandle: Color(0xFFC9822B),
+    readerHighlightCoral: Color(0x4DE8806E),
+    readerHighlightYellow: Color(0x4DF2C94C),
+    readerHighlightBlue: Color(0x4D56CCF2),
+    readerHighlightTeal: Color(0x4D5FE0C0),
+    readerHighlightGray: Color(0x4DBDBDBD),
   );
 
   @override
@@ -156,6 +179,11 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? readerBlackMuted,
     Color? readerSelectionTint,
     Color? readerSelectionHandle,
+    Color? readerHighlightCoral,
+    Color? readerHighlightYellow,
+    Color? readerHighlightBlue,
+    Color? readerHighlightTeal,
+    Color? readerHighlightGray,
   }) {
     return AppColors(
       bg: bg ?? this.bg,
@@ -185,6 +213,11 @@ class AppColors extends ThemeExtension<AppColors> {
       readerBlackMuted: readerBlackMuted ?? this.readerBlackMuted,
       readerSelectionTint: readerSelectionTint ?? this.readerSelectionTint,
       readerSelectionHandle: readerSelectionHandle ?? this.readerSelectionHandle,
+      readerHighlightCoral: readerHighlightCoral ?? this.readerHighlightCoral,
+      readerHighlightYellow: readerHighlightYellow ?? this.readerHighlightYellow,
+      readerHighlightBlue: readerHighlightBlue ?? this.readerHighlightBlue,
+      readerHighlightTeal: readerHighlightTeal ?? this.readerHighlightTeal,
+      readerHighlightGray: readerHighlightGray ?? this.readerHighlightGray,
     );
   }
 
@@ -219,6 +252,11 @@ class AppColors extends ThemeExtension<AppColors> {
       :readerBlackMuted,
       :readerSelectionTint,
       :readerSelectionHandle,
+      :readerHighlightCoral,
+      :readerHighlightYellow,
+      :readerHighlightBlue,
+      :readerHighlightTeal,
+      :readerHighlightGray,
     ) = other;
     return AppColors(
       bg: Color.lerp(this.bg, bg, t)!,
@@ -248,6 +286,11 @@ class AppColors extends ThemeExtension<AppColors> {
       readerBlackMuted: Color.lerp(this.readerBlackMuted, readerBlackMuted, t)!,
       readerSelectionTint: Color.lerp(this.readerSelectionTint, readerSelectionTint, t)!,
       readerSelectionHandle: Color.lerp(this.readerSelectionHandle, readerSelectionHandle, t)!,
+      readerHighlightCoral: Color.lerp(this.readerHighlightCoral, readerHighlightCoral, t)!,
+      readerHighlightYellow: Color.lerp(this.readerHighlightYellow, readerHighlightYellow, t)!,
+      readerHighlightBlue: Color.lerp(this.readerHighlightBlue, readerHighlightBlue, t)!,
+      readerHighlightTeal: Color.lerp(this.readerHighlightTeal, readerHighlightTeal, t)!,
+      readerHighlightGray: Color.lerp(this.readerHighlightGray, readerHighlightGray, t)!,
     );
   }
 }

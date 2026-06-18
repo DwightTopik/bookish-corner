@@ -3540,6 +3540,15 @@ class $ReaderAnnotationsTable extends ReaderAnnotations
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3561,6 +3570,7 @@ class $ReaderAnnotationsTable extends ReaderAnnotations
     chapterIndex,
     body,
     noteText,
+    color,
     createdAt,
   ];
   @override
@@ -3635,6 +3645,12 @@ class $ReaderAnnotationsTable extends ReaderAnnotations
         noteText.isAcceptableOrUnknown(data['note_text']!, _noteTextMeta),
       );
     }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3684,6 +3700,10 @@ class $ReaderAnnotationsTable extends ReaderAnnotations
         DriftSqlType.string,
         data['${effectivePrefix}note_text'],
       ),
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3707,6 +3727,7 @@ class ReaderAnnotationRow extends DataClass
   final int? chapterIndex;
   final String body;
   final String? noteText;
+  final String? color;
   final DateTime createdAt;
   const ReaderAnnotationRow({
     required this.id,
@@ -3717,6 +3738,7 @@ class ReaderAnnotationRow extends DataClass
     this.chapterIndex,
     required this.body,
     this.noteText,
+    this.color,
     required this.createdAt,
   });
   @override
@@ -3733,6 +3755,9 @@ class ReaderAnnotationRow extends DataClass
     map['body'] = Variable<String>(body);
     if (!nullToAbsent || noteText != null) {
       map['note_text'] = Variable<String>(noteText);
+    }
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<String>(color);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
@@ -3752,6 +3777,9 @@ class ReaderAnnotationRow extends DataClass
       noteText: noteText == null && nullToAbsent
           ? const Value.absent()
           : Value(noteText),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
       createdAt: Value(createdAt),
     );
   }
@@ -3770,6 +3798,7 @@ class ReaderAnnotationRow extends DataClass
       chapterIndex: serializer.fromJson<int?>(json['chapterIndex']),
       body: serializer.fromJson<String>(json['body']),
       noteText: serializer.fromJson<String?>(json['noteText']),
+      color: serializer.fromJson<String?>(json['color']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -3785,6 +3814,7 @@ class ReaderAnnotationRow extends DataClass
       'chapterIndex': serializer.toJson<int?>(chapterIndex),
       'body': serializer.toJson<String>(body),
       'noteText': serializer.toJson<String?>(noteText),
+      'color': serializer.toJson<String?>(color),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -3798,6 +3828,7 @@ class ReaderAnnotationRow extends DataClass
     Value<int?> chapterIndex = const Value.absent(),
     String? body,
     Value<String?> noteText = const Value.absent(),
+    Value<String?> color = const Value.absent(),
     DateTime? createdAt,
   }) => ReaderAnnotationRow(
     id: id ?? this.id,
@@ -3808,6 +3839,7 @@ class ReaderAnnotationRow extends DataClass
     chapterIndex: chapterIndex.present ? chapterIndex.value : this.chapterIndex,
     body: body ?? this.body,
     noteText: noteText.present ? noteText.value : this.noteText,
+    color: color.present ? color.value : this.color,
     createdAt: createdAt ?? this.createdAt,
   );
   ReaderAnnotationRow copyWithCompanion(ReaderAnnotationsCompanion data) {
@@ -3822,6 +3854,7 @@ class ReaderAnnotationRow extends DataClass
           : this.chapterIndex,
       body: data.body.present ? data.body.value : this.body,
       noteText: data.noteText.present ? data.noteText.value : this.noteText,
+      color: data.color.present ? data.color.value : this.color,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -3837,6 +3870,7 @@ class ReaderAnnotationRow extends DataClass
           ..write('chapterIndex: $chapterIndex, ')
           ..write('body: $body, ')
           ..write('noteText: $noteText, ')
+          ..write('color: $color, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -3852,6 +3886,7 @@ class ReaderAnnotationRow extends DataClass
     chapterIndex,
     body,
     noteText,
+    color,
     createdAt,
   );
   @override
@@ -3866,6 +3901,7 @@ class ReaderAnnotationRow extends DataClass
           other.chapterIndex == this.chapterIndex &&
           other.body == this.body &&
           other.noteText == this.noteText &&
+          other.color == this.color &&
           other.createdAt == this.createdAt);
 }
 
@@ -3878,6 +3914,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
   final Value<int?> chapterIndex;
   final Value<String> body;
   final Value<String?> noteText;
+  final Value<String?> color;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const ReaderAnnotationsCompanion({
@@ -3889,6 +3926,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
     this.chapterIndex = const Value.absent(),
     this.body = const Value.absent(),
     this.noteText = const Value.absent(),
+    this.color = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -3901,6 +3939,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
     this.chapterIndex = const Value.absent(),
     required String body,
     this.noteText = const Value.absent(),
+    this.color = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -3919,6 +3958,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
     Expression<int>? chapterIndex,
     Expression<String>? body,
     Expression<String>? noteText,
+    Expression<String>? color,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -3931,6 +3971,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
       if (chapterIndex != null) 'chapter_index': chapterIndex,
       if (body != null) 'body': body,
       if (noteText != null) 'note_text': noteText,
+      if (color != null) 'color': color,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3945,6 +3986,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
     Value<int?>? chapterIndex,
     Value<String>? body,
     Value<String?>? noteText,
+    Value<String?>? color,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -3957,6 +3999,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
       chapterIndex: chapterIndex ?? this.chapterIndex,
       body: body ?? this.body,
       noteText: noteText ?? this.noteText,
+      color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -3989,6 +4032,9 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
     if (noteText.present) {
       map['note_text'] = Variable<String>(noteText.value);
     }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4009,6 +4055,7 @@ class ReaderAnnotationsCompanion extends UpdateCompanion<ReaderAnnotationRow> {
           ..write('chapterIndex: $chapterIndex, ')
           ..write('body: $body, ')
           ..write('noteText: $noteText, ')
+          ..write('color: $color, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -6351,6 +6398,7 @@ typedef $$ReaderAnnotationsTableCreateCompanionBuilder =
       Value<int?> chapterIndex,
       required String body,
       Value<String?> noteText,
+      Value<String?> color,
       required DateTime createdAt,
       Value<int> rowid,
     });
@@ -6364,6 +6412,7 @@ typedef $$ReaderAnnotationsTableUpdateCompanionBuilder =
       Value<int?> chapterIndex,
       Value<String> body,
       Value<String?> noteText,
+      Value<String?> color,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -6444,6 +6493,11 @@ class $$ReaderAnnotationsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -6517,6 +6571,11 @@ class $$ReaderAnnotationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -6577,6 +6636,9 @@ class $$ReaderAnnotationsTableAnnotationComposer
 
   GeneratedColumn<String> get noteText =>
       $composableBuilder(column: $table.noteText, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -6646,6 +6708,7 @@ class $$ReaderAnnotationsTableTableManager
                 Value<int?> chapterIndex = const Value.absent(),
                 Value<String> body = const Value.absent(),
                 Value<String?> noteText = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReaderAnnotationsCompanion(
@@ -6657,6 +6720,7 @@ class $$ReaderAnnotationsTableTableManager
                 chapterIndex: chapterIndex,
                 body: body,
                 noteText: noteText,
+                color: color,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -6670,6 +6734,7 @@ class $$ReaderAnnotationsTableTableManager
                 Value<int?> chapterIndex = const Value.absent(),
                 required String body,
                 Value<String?> noteText = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 required DateTime createdAt,
                 Value<int> rowid = const Value.absent(),
               }) => ReaderAnnotationsCompanion.insert(
@@ -6681,6 +6746,7 @@ class $$ReaderAnnotationsTableTableManager
                 chapterIndex: chapterIndex,
                 body: body,
                 noteText: noteText,
+                color: color,
                 createdAt: createdAt,
                 rowid: rowid,
               ),

@@ -189,6 +189,7 @@ void main() {
       charStart: 10,
       charEnd: 50,
       text: 'annotation text $id',
+      color: HighlightColor.coral,
       createdAt: DateTime(2026),
     );
 
@@ -222,6 +223,49 @@ void main() {
       await repo.removeAnnotation('q3');
       final list = await repo.watchAnnotations('book3').first;
       expect(list.where((a) => a.id == 'q3'), isEmpty);
+    });
+
+    test('addAnnotation сохраняет color, _toDomain читает верно', () async {
+      await repo.addAnnotation(
+        ReaderAnnotation(
+          id: 'col1',
+          bookId: 'book3',
+          type: ReaderAnnotationType.quote,
+          charStart: 1,
+          charEnd: 10,
+          text: 'colored',
+          color: HighlightColor.teal,
+          createdAt: DateTime(2026),
+        ),
+      );
+      final list = await repo.watchAnnotations('book3').first;
+      expect(list.first.color, equals(HighlightColor.teal));
+    });
+
+    test('updateColor меняет цвет аннотации', () async {
+      await repo.addAnnotation(ann('col2', ReaderAnnotationType.quote));
+      await repo.updateColor('col2', HighlightColor.blue);
+      final list = await repo.watchAnnotations('book3').first;
+      final updated = list.firstWhere((a) => a.id == 'col2');
+      expect(updated.color, equals(HighlightColor.blue));
+    });
+
+    test('null color в БД читается как coral', () async {
+      // Прямая вставка без color (NULL) — имитирует строки v7-схемы.
+      await db.into(db.readerAnnotations).insert(
+        ReaderAnnotationsCompanion.insert(
+          id: 'legacy',
+          bookId: 'book3',
+          type: ReaderAnnotationType.quote.index,
+          charStart: 0,
+          charEnd: 5,
+          body: 'legacy text',
+          createdAt: DateTime(2026),
+        ),
+      );
+      final list = await repo.watchAnnotations('book3').first;
+      final row = list.firstWhere((a) => a.id == 'legacy');
+      expect(row.color, equals(HighlightColor.coral));
     });
   });
 
@@ -259,6 +303,7 @@ void main() {
           charStart: 10,
           charEnd: 30,
           text: 'quoted',
+          color: HighlightColor.coral,
           createdAt: DateTime(2026),
         ),
       );
@@ -272,6 +317,60 @@ void main() {
       expect(await db.select(readerProgress).get(), isEmpty);
       expect(await db.select(readerBookmarks).get(), isEmpty);
       expect(await db.select(readerAnnotations).get(), isEmpty);
+    });
+  });
+
+  group('migration v7 → v8', () {
+    test('color column добавляется, старые данные целы', () async {
+      // Открываем БД с v7-схемой: reader_annotations без колонки color.
+      final db = AppDatabase(
+        NativeDatabase.memory(
+          setup: (rawDb) {
+            rawDb.execute('''
+              CREATE TABLE books (
+                id TEXT NOT NULL PRIMARY KEY,
+                title TEXT NOT NULL,
+                author TEXT NOT NULL,
+                cover_url TEXT,
+                file_path TEXT,
+                file_format TEXT NOT NULL,
+                added_at INTEGER NOT NULL,
+                last_opened_at INTEGER
+              )
+            ''');
+            rawDb.execute('''
+              CREATE TABLE reader_annotations (
+                id TEXT NOT NULL PRIMARY KEY,
+                book_id TEXT NOT NULL,
+                type INTEGER NOT NULL,
+                char_start INTEGER NOT NULL,
+                char_end INTEGER NOT NULL,
+                chapter_index INTEGER,
+                body TEXT NOT NULL,
+                note_text TEXT,
+                created_at INTEGER NOT NULL,
+                FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE
+              )
+            ''');
+            rawDb.execute(
+              "INSERT INTO books VALUES ('b1','T','A',NULL,NULL,'fb2',0,NULL)",
+            );
+            rawDb.execute(
+              "INSERT INTO reader_annotations VALUES ('a1','b1',0,5,15,NULL,'old text',NULL,0)",
+            );
+            // Устанавливаем user_version=7 — Drift вызовет onUpgrade(m,7,8).
+            rawDb.execute('PRAGMA user_version = 7');
+          },
+        ),
+      );
+      addTearDown(db.close);
+
+      // Чтение форсирует открытие БД и запуск миграции.
+      final rows = await db.select(db.readerAnnotations).get();
+      expect(rows, hasLength(1));
+      expect(rows.first.id, equals('a1'));
+      // После миграции колонка color существует и равна NULL для старых строк.
+      expect(rows.first.color == null, isTrue);
     });
   });
 }

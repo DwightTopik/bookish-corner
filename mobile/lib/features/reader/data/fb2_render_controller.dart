@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart' show Animation;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show Offset, Rect;
 
@@ -103,7 +104,63 @@ class Fb2RenderController extends ChangeNotifier {
   List<Rect> rectsForCharRange(int charStart, int charEnd) =>
       onGeometry?.call()?.rectsForCharRange(charStart, charEnd) ?? const [];
 
+  /// Тонкие прямоугольники-подчёркивания у базовой линии каждой строки диапазона
+  /// (для аннотаций-заметок). [thickness] — высота линии, [gap] — отступ ниже
+  /// базовой линии.
+  List<Rect> underlinesForCharRange(
+    int charStart,
+    int charEnd, {
+    required double thickness,
+    required double gap,
+  }) =>
+      onGeometry
+          ?.call()
+          ?.underlinesForCharRange(
+            charStart,
+            charEnd,
+            thickness: thickness,
+            gap: gap,
+          ) ??
+      const [];
+
   /// Текст для диапазона символов из текущей страницы.
   String textForRange(int charStart, int charEnd) =>
       onGeometry?.call()?.textForRange(charStart, charEnd) ?? '';
+
+  // ── Слайд-анимация листания для overlay-слоёв (D1b polish) ────────────────
+  //
+  // Хайлайты — отдельный overlay вне вёрстки; при листании текст слайдится
+  // (`_SlideCanvas`), а логическая позиция репортится мгновенно. Чтобы хайлайт
+  // «ехал» вместе с входящей страницей, вью отдаёт сюда анимацию слайда, а
+  // overlay читает [incomingSlideDx] и слушает [pageSlide].
+
+  Animation<double>? _pageSlide;
+  int _pageSlideDir = 1;
+  double _pageSlideWidth = 0;
+  bool _pageSlideActive = false;
+
+  /// Стабильный listenable анимации слайда (или `null` до первого листания).
+  /// Overlay подмешивает его в свой ListenableBuilder для покадрового repaint.
+  Listenable? get pageSlide => _pageSlide;
+
+  /// Смещение входящей страницы по X в текущем кадре (0 в покое). Совпадает с
+  /// `inTx` в `_SlideCanvas`: `dir*(1-t)*width`.
+  double get incomingSlideDx => _pageSlideActive && _pageSlide != null
+      ? _pageSlideDir * (1.0 - _pageSlide!.value) * _pageSlideWidth
+      : 0.0;
+
+  /// Вью зовёт при старте слайд-анимации (до `updatePosition`, чтобы rebuild
+  /// overlay подхватил merged-listenable).
+  void beginPageSlide(Animation<double> animation, int dir, double width) {
+    _pageSlide = animation;
+    _pageSlideDir = dir;
+    _pageSlideWidth = width;
+    _pageSlideActive = true;
+  }
+
+  /// Вью зовёт при завершении/прерывании слайда (jump/relayout). [incomingSlideDx]
+  /// возвращается к 0; ссылку на анимацию не сбрасываем (она стабильна).
+  void endPageSlide() {
+    _pageSlideActive = false;
+  }
 }

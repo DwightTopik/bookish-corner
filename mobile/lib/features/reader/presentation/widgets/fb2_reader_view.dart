@@ -509,6 +509,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
     _animSlide = CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOut);
     _animCtrl.addStatusListener((AnimationStatus status) {
       if (status == .completed && mounted) {
+        _engine?.renderController.endPageSlide();
         setState(() => _outgoingUnits = null);
       }
     });
@@ -634,10 +635,13 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
       _localPage = newPage;
       _layout = newLayout;
     });
-    _report();
 
     _outgoingUnits = outgoing;
     _animDir = 1;
+    // До _report(): notify-rebuild overlay должен подхватить merged-listenable.
+    _engine?.renderController
+        .beginPageSlide(_animSlide, _animDir, _contentWidth + 2 * _hMargin);
+    _report();
     _animCtrl.forward(from: 0.0);
   }
 
@@ -668,10 +672,13 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
       _localPage = newPage;
       _layout = newLayout;
     });
-    _report();
 
     _outgoingUnits = outgoing;
     _animDir = -1;
+    // До _report(): notify-rebuild overlay должен подхватить merged-listenable.
+    _engine?.renderController
+        .beginPageSlide(_animSlide, _animDir, _contentWidth + 2 * _hMargin);
+    _report();
     _animCtrl.forward(from: 0.0);
   }
 
@@ -680,6 +687,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
     // Прыжок — мгновенно: останавливаем анимацию, если шла.
     _animCtrl.stop();
     _outgoingUnits = null;
+    _engine?.renderController.endPageSlide();
 
     _chapterIndex = chapterIndex;
     _layout = null;
@@ -700,6 +708,7 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
     _engine?.renderController.onSelectionReset?.call();
     _animCtrl.stop();
     _outgoingUnits = null;
+    _engine?.renderController.endPageSlide();
 
     final int currentOffset =
         _layout?.pages.elementAtOrNull(_localPage)?.startCharOffset ?? 0;

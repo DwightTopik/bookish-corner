@@ -37,6 +37,7 @@ class DriftReaderAnnotationRepository implements ReaderAnnotationRepository {
       :chapterIndex,
       text: annotationText,
       :noteText,
+      :color,
       :createdAt,
     ) = annotation;
     await _db.into(_db.readerAnnotations).insertOnConflictUpdate(
@@ -49,6 +50,7 @@ class DriftReaderAnnotationRepository implements ReaderAnnotationRepository {
         chapterIndex: Value(chapterIndex),
         body: Value(annotationText),
         noteText: Value(noteText),
+        color: Value(color.name),
         createdAt: Value(createdAt),
       ),
     );
@@ -58,6 +60,12 @@ class DriftReaderAnnotationRepository implements ReaderAnnotationRepository {
   Future<void> updateNote(String id, String noteText) async {
     await (_db.update(_db.readerAnnotations)..where((t) => t.id.equals(id)))
         .write(ReaderAnnotationsCompanion(noteText: Value(noteText)));
+  }
+
+  @override
+  Future<void> updateColor(String id, HighlightColor color) async {
+    await (_db.update(_db.readerAnnotations)..where((t) => t.id.equals(id)))
+        .write(ReaderAnnotationsCompanion(color: Value(color.name)));
   }
 
   @override
@@ -75,6 +83,7 @@ class DriftReaderAnnotationRepository implements ReaderAnnotationRepository {
       :chapterIndex,
       body: annotationText,
       :noteText,
+      :color,
       :createdAt,
     ) = row;
     return ReaderAnnotation(
@@ -86,6 +95,7 @@ class DriftReaderAnnotationRepository implements ReaderAnnotationRepository {
       chapterIndex: chapterIndex,
       text: annotationText,
       noteText: noteText,
+      color: color == null ? HighlightColor.coral : HighlightColor.values.byName(color),
       createdAt: createdAt,
     );
   }

@@ -18,6 +18,7 @@ import 'package:bookish_corner/features/reader/presentation/widgets/reader_gestu
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_immersive_footer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_chapters_sheet.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_settings_sheet.dart';
+import 'package:bookish_corner/features/reader/presentation/widgets/reader_highlights_layer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_selection_layer.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_toolbar.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_top_bar.dart';
@@ -120,6 +121,8 @@ class _ReaderReadyView extends ConsumerWidget {
         children: [
           // Слой 0 — поверхность рендера.
           Positioned.fill(child: ReaderView(bookId: bookId)),
+          // Слой 0.5 — хайлайты сохранённых аннотаций (IgnorePointer, char-based).
+          Positioned.fill(child: ReaderHighlightsLayer(bookId: bookId)),
           // Слой 1 — затемнение (dim overlay), управляется ползунком яркости.
           Positioned.fill(
             child: IgnorePointer(

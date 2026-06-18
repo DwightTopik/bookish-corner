@@ -256,6 +256,43 @@ void main() {
     expect(geo.rectsForCharRange(100, 200), isEmpty);
   });
 
+  // ── underlinesForCharRange ───────────────────────────────────────────────
+
+  test('underlinesForCharRange: тонкий rect у базовой линии (одна строка)', () {
+    // 'Hello' умещается в одну строку при width 400 → один подчёркивающий rect.
+    const text = 'Hello';
+    final geo = _singleBlockGeometry(text, width: 400);
+    final (_, metrics) = _buildPainter(text, width: 400);
+    const thickness = 2.0;
+    const gap = 1.5;
+
+    final unders =
+        geo.underlinesForCharRange(0, 5, thickness: thickness, gap: gap);
+    expect(unders, hasLength(1));
+    final Rect(:top, :height, :width, :left, :right) = unders.first;
+    final Rect(left: fillLeft, right: fillRight, bottom: fillBottom) =
+        geo.rectsForCharRange(0, 5).first;
+
+    // Толщина = токен; ширина положительная.
+    expect(height, closeTo(thickness, 0.01));
+    expect(width, greaterThan(0));
+    // Подчёркивание сидит у базовой линии (первая строка → _lineTop = 0).
+    expect(top, closeTo(metrics[0].baseline + gap, 0.5));
+    // Внутри line-box заливки (выше его нижней границы при height = 1.5).
+    expect(top, lessThan(fillBottom));
+    // Горизонтальные края совпадают с заливкой.
+    expect(left, closeTo(fillLeft, 0.01));
+    expect(right, closeTo(fillRight, 0.01));
+  });
+
+  test('underlinesForCharRange: пустой диапазон → пустой список', () {
+    final geo = _singleBlockGeometry('Hello', width: 400);
+    expect(
+      geo.underlinesForCharRange(3, 3, thickness: 2, gap: 1.5),
+      isEmpty,
+    );
+  });
+
   // ── textForRange ─────────────────────────────────────────────────────────
 
   test('textForRange: извлекает текст из одного блока', () {
