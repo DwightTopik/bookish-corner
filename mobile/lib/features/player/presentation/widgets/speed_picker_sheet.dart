@@ -56,7 +56,7 @@ class _PlayerSheetFrame extends StatelessWidget {
         child: Padding(
           padding: const .fromLTRB(16, 10, 16, 18),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               Container(
                 width: 48,
@@ -72,7 +72,7 @@ class _PlayerSheetFrame extends StatelessWidget {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: .w700,
                 ),
               ),
               child,

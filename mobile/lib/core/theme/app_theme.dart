@@ -4,7 +4,7 @@ import 'package:bookish_corner/core/theme/app_colors.dart';
 ThemeData buildLightTheme() {
   final base = ColorScheme.fromSeed(
     seedColor: const Color(0xFF2D8B6F),
-    brightness: Brightness.light,
+    brightness: .light,
   );
   return ThemeData(
     useMaterial3: true,
@@ -17,7 +17,7 @@ ThemeData buildLightTheme() {
 ThemeData buildDarkTheme() {
   final base = ColorScheme.fromSeed(
     seedColor: const Color(0xFF2D8B6F),
-    brightness: Brightness.dark,
+    brightness: .dark,
   );
   return ThemeData(
     useMaterial3: true,

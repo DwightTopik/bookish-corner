@@ -19,7 +19,7 @@ class PlayerProgress extends StatelessWidget {
     final maxMs = state.chapterDuration.inMilliseconds;
     final valueMs = state.position.inMilliseconds.clamp(0, maxMs);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: .stretch,
       children: [
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
@@ -40,7 +40,7 @@ class PlayerProgress extends StatelessWidget {
           ),
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: .spaceBetween,
           children: [
             Text(
               _format(state.position),

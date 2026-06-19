@@ -23,7 +23,7 @@ class SleepTimerSheet extends ConsumerWidget {
         child: Padding(
           padding: const .fromLTRB(16, 10, 16, 18),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               const _SheetHandle(),
               const Gap(28),
@@ -32,7 +32,7 @@ class SleepTimerSheet extends ConsumerWidget {
                 style: TextStyle(
                   color: textPrimary,
                   fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: .w700,
                 ),
               ),
               HorizontalPicker<SleepTimerOption>(

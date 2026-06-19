@@ -31,7 +31,7 @@ class SeekButton extends StatelessWidget {
       onTap: onTap,
       radius: size * 0.8,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         spacing: 2,
         children: [
           icon,
@@ -40,7 +40,7 @@ class SeekButton extends StatelessWidget {
             style: TextStyle(
               color: color,
               fontSize: size * 0.36,
-              fontWeight: FontWeight.w600,
+              fontWeight: .w600,
               height: 1,
             ),
           ),

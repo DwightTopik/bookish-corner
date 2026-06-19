@@ -39,7 +39,7 @@ class Books extends Table {
 class BookChapters extends Table {
   TextColumn get id => text()();
   TextColumn get bookId =>
-      text().references(Books, #id, onDelete: KeyAction.cascade)();
+      text().references(Books, #id, onDelete: .cascade)();
   IntColumn get position => integer()();
   TextColumn get filePath => text()();
   TextColumn get title => text().nullable()();
@@ -53,7 +53,7 @@ class BookChapters extends Table {
 @DataClassName('AudioProgressRow')
 class AudioProgress extends Table {
   TextColumn get bookId =>
-      text().references(Books, #id, onDelete: KeyAction.cascade)();
+      text().references(Books, #id, onDelete: .cascade)();
   IntColumn get chapterIndex => integer()();
   IntColumn get positionMs => integer()();
   DateTimeColumn get updatedAt => dateTime()();
@@ -66,7 +66,7 @@ class AudioProgress extends Table {
 class AudioBookmarks extends Table {
   TextColumn get id => text()();
   TextColumn get bookId =>
-      text().references(Books, #id, onDelete: KeyAction.cascade)();
+      text().references(Books, #id, onDelete: .cascade)();
   IntColumn get chapterIndex => integer()();
   IntColumn get positionMs => integer()();
   TextColumn get title => text()();
@@ -78,13 +78,70 @@ class AudioBookmarks extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Books, BookChapters, AudioProgress, AudioBookmarks])
+@DataClassName('ReaderProgressRow')
+class ReaderProgress extends Table {
+  TextColumn get bookId => text().customConstraint(
+    'NOT NULL REFERENCES books(id) ON DELETE CASCADE',
+  )();
+  IntColumn get charOffset => integer()();
+  IntColumn get chapterIndex => integer().nullable()();
+  RealColumn get percent => real()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {bookId};
+}
+
+@DataClassName('ReaderBookmarkRow')
+class ReaderBookmarks extends Table {
+  TextColumn get id => text()();
+  TextColumn get bookId => text().customConstraint(
+    'NOT NULL REFERENCES books(id) ON DELETE CASCADE',
+  )();
+  IntColumn get charOffset => integer()();
+  IntColumn get chapterIndex => integer().nullable()();
+  TextColumn get previewText => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('ReaderAnnotationRow')
+class ReaderAnnotations extends Table {
+  TextColumn get id => text()();
+  TextColumn get bookId => text().customConstraint(
+    'NOT NULL REFERENCES books(id) ON DELETE CASCADE',
+  )();
+  IntColumn get type => integer()(); // 0=quote, 1=note
+  IntColumn get charStart => integer()();
+  IntColumn get charEnd => integer()();
+  IntColumn get chapterIndex => integer().nullable()();
+  TextColumn get body => text()();
+  TextColumn get noteText => text().nullable()();
+  // Ключ HighlightColor по .name; null → coral (дефолт для строк до v8).
+  TextColumn get color => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [
+  Books,
+  BookChapters,
+  AudioProgress,
+  AudioBookmarks,
+  ReaderProgress,
+  ReaderBookmarks,
+  ReaderAnnotations,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
     : super(executor ?? driftDatabase(name: 'bookish'));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => .new(
@@ -106,6 +163,17 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await m.createTable(audioBookmarks);
+      }
+      if (from < 7) {
+        await m.createTable(readerProgress);
+        await m.createTable(readerBookmarks);
+        await m.createTable(readerAnnotations);
+      }
+      if (from < 8) {
+        await m.addColumn(
+          readerAnnotations,
+          readerAnnotations.color as GeneratedColumn<Object>,
+        );
       }
     },
   );

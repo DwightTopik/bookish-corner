@@ -94,7 +94,7 @@ class _PlayerViewState extends ConsumerState<_PlayerView> {
             vertical: AppDimensions.screenVPadding,
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: .stretch,
             children: [
               _PlayerHeader(
                 bookId: book?.id,
@@ -121,13 +121,13 @@ class _PlayerViewState extends ConsumerState<_PlayerView> {
               const Gap(AppDimensions.playerChapterTitleTopGap),
               Text(
                 state.currentChapter?.title ?? bookTitle,
-                textAlign: TextAlign.center,
+                textAlign: .center,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
                 style: TextStyle(
                   color: textPrimary,
                   fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: .w700,
                 ),
               ),
               const Spacer(flex: 2),
@@ -199,7 +199,7 @@ class _BookProgressSummary extends StatelessWidget {
 
     return Center(
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: .opaque,
         onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -226,11 +226,11 @@ class _BookProgressSummary extends StatelessWidget {
               child: Text(
                 label,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
                 style: TextStyle(
                   color: textSecondary.withValues(alpha: 0.74),
                   fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: .w700,
                   letterSpacing: 0,
                 ),
               ),
@@ -298,28 +298,28 @@ class _PlayerHeader extends StatelessWidget {
         ),
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: .start,
+            mainAxisSize: .min,
             children: [
               Text(
                 bookTitle,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
                 style: TextStyle(
                   color: textPrimary,
                   fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: .w700,
                 ),
               ),
               const Gap(2),
               Text(
                 bookAuthor,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
                 style: TextStyle(
                   color: textTertiary,
                   fontSize: 13,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: .w500,
                 ),
               ),
             ],
@@ -329,7 +329,7 @@ class _PlayerHeader extends StatelessWidget {
           dimension: AppDimensions.bookDetailsInfoButtonSize,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              shape: .circle,
               color: elevated.withValues(alpha: 0.68),
             ),
             child: IconButton(

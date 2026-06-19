@@ -101,7 +101,7 @@ class _DetailsView extends StatelessWidget {
                   child: Padding(
                     padding: const .fromLTRB(20, 12, 20, 34),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: .stretch,
                       children: [
                         _Header(title: details.title),
                         _HeroSection(
@@ -183,11 +183,11 @@ class _Header extends StatelessWidget {
             child: Text(
               title ?? '',
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              overflow: .ellipsis,
               style: TextStyle(
                 color: textTertiary,
                 fontSize: 17,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
                 letterSpacing: 0,
               ),
             ),
@@ -229,12 +229,12 @@ class _HeroSection extends StatelessWidget {
           if (details.title != null)
             Text(
               details.title!,
-              textAlign: TextAlign.center,
+              textAlign: .center,
               style: TextStyle(
                 color: textPrimary,
                 fontSize: 31,
                 height: 1.08,
-                fontWeight: FontWeight.w800,
+                fontWeight: .w800,
                 letterSpacing: 0,
               ),
             ),
@@ -242,11 +242,11 @@ class _HeroSection extends StatelessWidget {
             const Gap(10),
             Text(
               details.author!,
-              textAlign: TextAlign.center,
+              textAlign: .center,
               style: TextStyle(
                 color: textSecondary,
                 fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
                 letterSpacing: 0,
               ),
             ),
@@ -255,11 +255,11 @@ class _HeroSection extends StatelessWidget {
             const Gap(10),
             Text(
               details.series!,
-              textAlign: TextAlign.center,
+              textAlign: .center,
               style: TextStyle(
                 color: textTertiary,
                 fontSize: 14,
-                fontWeight: FontWeight.w700,
+                fontWeight: .w700,
               ),
             ),
           ],
@@ -293,7 +293,7 @@ class _SoftLoadingPill extends StatelessWidget {
           style: TextStyle(
             color: textTertiary,
             fontSize: 12,
-            fontWeight: FontWeight.w700,
+            fontWeight: .w700,
           ),
         ),
       ),
@@ -350,7 +350,7 @@ class _PrimaryMetadata extends StatelessWidget {
     return Padding(
       padding: const .only(bottom: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           if (items.isNotEmpty)
             Wrap(
@@ -493,35 +493,35 @@ class _InfoTile extends StatelessWidget {
         ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           Icon(item.icon, size: 18, color: textTertiary),
           const Gap(9),
           Flexible(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: .start,
+              mainAxisSize: .min,
               children: [
                 Text(
                   item.label,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: .ellipsis,
                   style: TextStyle(
                     color: textTertiary,
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: .w700,
                   ),
                 ),
                 const Gap(3),
                 Text(
                   item.value!,
                   maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: .ellipsis,
                   style: TextStyle(
                     color: textSecondary,
                     fontSize: 14,
                     height: 1.18,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: .w700,
                   ),
                 ),
               ],
@@ -553,7 +553,7 @@ class _GenreChip extends StatelessWidget {
           style: TextStyle(
             color: textSecondary,
             fontSize: 13,
-            fontWeight: FontWeight.w800,
+            fontWeight: .w800,
           ),
         ),
       ),
@@ -587,7 +587,7 @@ class _DescriptionSectionState extends State<_DescriptionSection> {
       surfaceColor: surface.withValues(alpha: 0.68),
       borderColor: border.withValues(alpha: 0.35),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           _SectionTitle(title: 'Описание'),
           const Gap(11),
@@ -606,7 +606,7 @@ class _DescriptionSectionState extends State<_DescriptionSection> {
                     color: textSecondary,
                     fontSize: 14.5,
                     height: 1.5,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: .w500,
                     letterSpacing: 0,
                   ),
                 ),
@@ -640,7 +640,7 @@ class _DescriptionSectionState extends State<_DescriptionSection> {
                 style: TextButton.styleFrom(
                   foregroundColor: accent,
                   padding: .zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  tapTargetSize: .shrinkWrap,
                 ),
                 onPressed: () {
                   setState(() {
@@ -652,7 +652,7 @@ class _DescriptionSectionState extends State<_DescriptionSection> {
                   style: TextStyle(
                     color: accent,
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: .w800,
                   ),
                 ),
               ),
@@ -699,7 +699,7 @@ class _DetailsGrid extends StatelessWidget {
     return _SectionShell(
       margin: const .only(bottom: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           _SectionTitle(title: 'Сведения'),
           const Gap(8),
@@ -732,7 +732,7 @@ class _FactRow extends StatelessWidget {
       padding: const .symmetric(vertical: 10),
       decoration: BoxDecoration(border: rowBorder),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           SizedBox(
             width: 126,
@@ -741,7 +741,7 @@ class _FactRow extends StatelessWidget {
               style: TextStyle(
                 color: textTertiary,
                 fontSize: 12.5,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
               ),
             ),
           ),
@@ -752,7 +752,7 @@ class _FactRow extends StatelessWidget {
                 color: textSecondary,
                 fontSize: 14,
                 height: 1.24,
-                fontWeight: FontWeight.w700,
+                fontWeight: .w700,
               ),
             ),
           ),
@@ -835,17 +835,17 @@ class _DebugDiagnosticsSection extends StatelessWidget {
               color: textSecondary,
               fontSize: 12,
               height: 1.28,
-              fontWeight: FontWeight.w600,
+              fontWeight: .w600,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               children: [
                 Text(
                   'DEBUG metadata diagnostics',
                   style: TextStyle(
                     color: textSecondary,
                     fontSize: 14,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: .w900,
                   ),
                 ),
                 const Gap(10),
@@ -1002,7 +1002,7 @@ class _SectionTitle extends StatelessWidget {
         color: textPrimary,
         fontSize: 20,
         height: 1.1,
-        fontWeight: FontWeight.w800,
+        fontWeight: .w800,
         letterSpacing: 0,
       ),
     );
@@ -1019,7 +1019,7 @@ class _RecommendationsSection extends StatelessWidget {
     return _SectionShell(
       margin: const .only(bottom: 10),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           _SectionTitle(title: 'Рекомендации'),
           const Gap(16),
@@ -1031,7 +1031,7 @@ class _RecommendationsSection extends StatelessWidget {
               return SizedBox(
                 height: 178,
                 child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
+                  scrollDirection: .horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: items.length,
                   separatorBuilder: (_, _) => const Gap(14),
@@ -1055,7 +1055,7 @@ class _RecommendationEmptyState extends StatelessWidget {
     final AppColors(:surface, :border, :textSecondary, :textTertiary, :accent) =
         context.appColors;
     return Container(
-      width: double.infinity,
+      width: .infinity,
       padding: const .all(16),
       decoration: BoxDecoration(
         color: surface.withValues(alpha: 0.54),
@@ -1070,7 +1070,7 @@ class _RecommendationEmptyState extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              shape: .circle,
               color: accent.withValues(alpha: 0.14),
             ),
             child: Icon(Icons.auto_awesome, color: accent, size: 19),
@@ -1078,14 +1078,14 @@ class _RecommendationEmptyState extends StatelessWidget {
           const Gap(13),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               children: [
                 Text(
                   'Подборка готовится',
                   style: TextStyle(
                     color: textSecondary,
                     fontSize: 14.5,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: .w800,
                   ),
                 ),
                 const Gap(3),
@@ -1095,7 +1095,7 @@ class _RecommendationEmptyState extends StatelessWidget {
                     color: textTertiary,
                     fontSize: 13,
                     height: 1.25,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: .w600,
                   ),
                 ),
               ],
@@ -1116,11 +1116,11 @@ class _RecommendationSkeleton extends StatelessWidget {
     return SizedBox(
       height: 156,
       child: ListView.separated(
-        scrollDirection: Axis.horizontal,
+        scrollDirection: .horizontal,
         itemCount: 3,
         separatorBuilder: (_, _) => const Gap(14),
         itemBuilder: (_, _) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             _SkeletonBox(width: 78, height: 112, color: surface),
             const Gap(10),
@@ -1169,7 +1169,7 @@ class _RecommendationCard extends StatelessWidget {
     return SizedBox(
       width: AppDimensions.bookDetailsRecommendationWidth,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           ClipRRect(
             borderRadius: const .all(.circular(10)),
@@ -1186,7 +1186,7 @@ class _RecommendationCard extends StatelessWidget {
                     )
                   : CachedNetworkImage(
                       imageUrl: recommendation.coverUrl!,
-                      fit: BoxFit.cover,
+                      fit: .cover,
                       errorWidget: (_, _, _) => ColoredBox(
                         color: surface,
                         child: Icon(
@@ -1201,23 +1201,23 @@ class _RecommendationCard extends StatelessWidget {
           Text(
             recommendation.title,
             maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            overflow: .ellipsis,
             style: TextStyle(
               color: textSecondary,
               fontSize: 13,
               height: 1.16,
-              fontWeight: FontWeight.w800,
+              fontWeight: .w800,
             ),
           ),
           const Gap(3),
           Text(
             recommendation.author,
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            overflow: .ellipsis,
             style: TextStyle(
               color: textTertiary,
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: .w600,
             ),
           ),
         ],

@@ -17,7 +17,7 @@ class LibraryEmptyView extends StatelessWidget {
       child: Padding(
         padding: const .all(32),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Icon(
               Icons.library_books_outlined,
@@ -27,7 +27,7 @@ class LibraryEmptyView extends StatelessWidget {
             const Gap(16),
             Text(
               'Добавьте первую книгу',
-              textAlign: TextAlign.center,
+              textAlign: .center,
               style: TextStyle(
                 fontSize: 16,
                 color: textSecondary,

@@ -50,24 +50,24 @@ class MiniPlayer extends ConsumerWidget {
                       const Gap(10),
                       Expanded(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: .center,
+                          crossAxisAlignment: .start,
                           children: [
                             Text(
                               state.currentChapter?.title ?? title,
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              overflow: .ellipsis,
                               style: TextStyle(
                                 color: textPrimary,
                                 fontSize: 14,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: .w700,
                               ),
                             ),
                             const Gap(2),
                             Text(
                               title,
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              overflow: .ellipsis,
                               style: TextStyle(
                                 color: textSecondary,
                                 fontSize: 12,
@@ -121,7 +121,7 @@ class _MiniCover extends StatelessWidget {
       child: SizedBox.square(
         dimension: AppDimensions.miniPlayerCoverSize,
         child: coverPath != null && File(coverPath).existsSync()
-            ? Image.file(File(coverPath), fit: BoxFit.cover)
+            ? Image.file(File(coverPath), fit: .cover)
             : ColoredBox(
                 color: surface,
                 child: Icon(Icons.headphones, color: textTertiary, size: 22),

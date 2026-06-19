@@ -11,6 +11,9 @@ plugins:
       dispose_provided_instances: false
       prefer_overriding_parent_equality: false
       prefer_immutable_bloc_state: false
+      # Fb2ReaderViewState._engine провайдер-owned (ref.onDispose): мы не владеем dispose.
+      # custom_lint не поддерживает per-line suppress для этого правила.
+      dispose_fields: false
 
 analyzer:
   errors:

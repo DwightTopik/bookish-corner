@@ -122,7 +122,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   key: const ValueKey('title'),
                   style: TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: .bold,
                     color: textPrimary,
                   ),
                 ),
@@ -175,7 +175,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             padding: const .all(32),
             child: Text(
               'Не удалось загрузить библиотеку',
-              textAlign: TextAlign.center,
+              textAlign: .center,
               style: TextStyle(color: textSecondary),
             ),
           ),
@@ -208,7 +208,7 @@ class _SearchField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Поиск...',
         hintStyle: TextStyle(color: textSecondary),
-        border: InputBorder.none,
+        border: .none,
         suffixIcon: IconButton(
           icon: Icon(Icons.clear, color: textSecondary),
           onPressed: onClear,
@@ -229,7 +229,7 @@ class _SearchEmptyState extends StatelessWidget {
         padding: const .all(32),
         child: Text(
           'Ничего не найдено',
-          textAlign: TextAlign.center,
+          textAlign: .center,
           style: TextStyle(
             fontSize: 16,
             color: context.appColors.textSecondary,
@@ -319,14 +319,14 @@ class _FilterSheetState extends State<_FilterSheet> {
           child: SingleChildScrollView(
             padding: const .all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: .start,
+              mainAxisSize: .min,
               children: [
                 Text(
                   'Фильтры',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: .bold,
                     color: textPrimary,
                   ),
                 ),
@@ -503,7 +503,7 @@ class _AddBookSheet extends StatelessWidget {
     final textPrimary = context.appColors.textPrimary;
     return SafeArea(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           ListTile(
             leading: Icon(Icons.menu_book_outlined, color: textPrimary),

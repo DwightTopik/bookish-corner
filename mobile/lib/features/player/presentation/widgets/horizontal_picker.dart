@@ -104,17 +104,17 @@ class _HorizontalPickerState<T> extends State<HorizontalPicker<T>> {
                     child: Padding(
                       padding: const .symmetric(horizontal: 4),
                       child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.center,
+                        fit: .scaleDown,
+                        alignment: .center,
                         child: Text(
                           widget.labelFor(widget.values[index]),
                           maxLines: 1,
                           softWrap: false,
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                           style: TextStyle(
                             color: color,
                             fontSize: fontSize,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: .w600,
                           ),
                         ),
                       ),
@@ -131,7 +131,7 @@ class _HorizontalPickerState<T> extends State<HorizontalPicker<T>> {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: accent,
-                  shape: BoxShape.circle,
+                  shape: .circle,
                 ),
               ),
             ),

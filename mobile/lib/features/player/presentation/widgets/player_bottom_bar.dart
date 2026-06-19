@@ -26,7 +26,7 @@ class PlayerBottomBar extends StatelessWidget {
     return SizedBox(
       height: AppDimensions.playerBottomBarHeight,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: .spaceAround,
         children: [
           _BarAction(
             icon: Icons.format_list_bulleted,
@@ -89,18 +89,18 @@ class _BarAction extends StatelessWidget {
       child: SizedBox(
         width: 72,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: [
             Icon(icon, color: textSecondary, size: 22),
             const Gap(5),
             Text(
               label,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              overflow: .ellipsis,
               style: TextStyle(
                 color: textSecondary,
                 fontSize: 11,
-                fontWeight: FontWeight.w500,
+                fontWeight: .w500,
               ),
             ),
           ],

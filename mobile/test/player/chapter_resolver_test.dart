@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bookish_corner/features/library/domain/book.dart';
-import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/player/data/chapter_resolvers/composite_chapter_resolver.dart';
 import 'package:bookish_corner/features/player/data/chapter_resolvers/natural_sort.dart';
 import 'package:bookish_corner/features/player/domain/audio_chapter.dart';
@@ -58,7 +57,7 @@ final _book = Book(
   title: 'Book',
   author: 'Author',
   filePath: 'book.mp3',
-  format: BookFormat.mp3,
+  format: .mp3,
   addedAt: DateTime(2026),
 );
 

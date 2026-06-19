@@ -16,6 +16,25 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.star,
     required this.success,
     required this.error,
+    required this.readerWhiteBg,
+    required this.readerWhiteText,
+    required this.readerWhiteMuted,
+    required this.readerSepiaBg,
+    required this.readerSepiaText,
+    required this.readerSepiaMuted,
+    required this.readerGrayBg,
+    required this.readerGrayText,
+    required this.readerGrayMuted,
+    required this.readerBlackBg,
+    required this.readerBlackText,
+    required this.readerBlackMuted,
+    required this.readerSelectionTint,
+    required this.readerSelectionHandle,
+    required this.readerHighlightCoral,
+    required this.readerHighlightYellow,
+    required this.readerHighlightBlue,
+    required this.readerHighlightTeal,
+    required this.readerHighlightGray,
   });
 
   final Color bg;
@@ -32,6 +51,35 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color success;
   final Color error;
 
+  /// Фиксированные палитры ридера (bg/text/muted). Одинаковые в dark и light —
+  /// независимы от app-темы. Авто-тема резолвится через [ReaderPalette.resolve]
+  /// как bg/textPrimary/textTertiary текущей app-темы.
+  final Color readerWhiteBg;
+  final Color readerWhiteText;
+  final Color readerWhiteMuted;
+  final Color readerSepiaBg;
+  final Color readerSepiaText;
+  final Color readerSepiaMuted;
+  final Color readerGrayBg;
+  final Color readerGrayText;
+  final Color readerGrayMuted;
+  final Color readerBlackBg;
+  final Color readerBlackText;
+  final Color readerBlackMuted;
+
+  /// Токены выделения текста. Одинаковы для dark/light — читаемы на всех 5 фонах ридера.
+  /// Янтарный (#C9822B): не конфликтует с accent, контрастен на белом/сепии/сером/чёрном.
+  final Color readerSelectionTint;
+  final Color readerSelectionHandle;
+
+  /// Тинты хайлайтов (D1b). Полупрозрачные (~30%), читаемы поверх всех 5 reader-фонов.
+  /// Одинаковы для dark/light.
+  final Color readerHighlightCoral;
+  final Color readerHighlightYellow;
+  final Color readerHighlightBlue;
+  final Color readerHighlightTeal;
+  final Color readerHighlightGray;
+
   static const dark = AppColors(
     bg: Color(0xFF090A0B),
     surface: Color(0xFF121416),
@@ -46,6 +94,25 @@ class AppColors extends ThemeExtension<AppColors> {
     star: Color(0xFFD8AE52),
     success: Color(0xFF4E9F6E),
     error: Color(0xFFE04F4F),
+    readerWhiteBg: Color(0xFFFFFFFF),
+    readerWhiteText: Color(0xFF2D2D2D),
+    readerWhiteMuted: Color(0xFF969696),
+    readerSepiaBg: Color(0xFFFBF4E2),
+    readerSepiaText: Color(0xFF59391F),
+    readerSepiaMuted: Color(0xFFA89785),
+    readerGrayBg: Color(0xFF4B4B4B),
+    readerGrayText: Color(0xFFE3E3E3),
+    readerGrayMuted: Color(0xFF969696),
+    readerBlackBg: Color(0xFF010101),
+    readerBlackText: Color(0xFFC2C2C2),
+    readerBlackMuted: Color(0xFF616161),
+    readerSelectionTint: Color(0x40C9822B),
+    readerSelectionHandle: Color(0xFFC9822B),
+    readerHighlightCoral: Color(0x4DE8806E),
+    readerHighlightYellow: Color(0x4DF2C94C),
+    readerHighlightBlue: Color(0x4D56CCF2),
+    readerHighlightTeal: Color(0x4D5FE0C0),
+    readerHighlightGray: Color(0x4DBDBDBD),
   );
 
   static const light = AppColors(
@@ -62,6 +129,25 @@ class AppColors extends ThemeExtension<AppColors> {
     star: Color(0xFFD8AE52),
     success: Color(0xFF4E9F6E),
     error: Color(0xFFE04F4F),
+    readerWhiteBg: Color(0xFFFFFFFF),
+    readerWhiteText: Color(0xFF2D2D2D),
+    readerWhiteMuted: Color(0xFF969696),
+    readerSepiaBg: Color(0xFFFBF4E2),
+    readerSepiaText: Color(0xFF59391F),
+    readerSepiaMuted: Color(0xFFA89785),
+    readerGrayBg: Color(0xFF4B4B4B),
+    readerGrayText: Color(0xFFE3E3E3),
+    readerGrayMuted: Color(0xFF969696),
+    readerBlackBg: Color(0xFF010101),
+    readerBlackText: Color(0xFFC2C2C2),
+    readerBlackMuted: Color(0xFF616161),
+    readerSelectionTint: Color(0x40C9822B),
+    readerSelectionHandle: Color(0xFFC9822B),
+    readerHighlightCoral: Color(0x4DE8806E),
+    readerHighlightYellow: Color(0x4DF2C94C),
+    readerHighlightBlue: Color(0x4D56CCF2),
+    readerHighlightTeal: Color(0x4D5FE0C0),
+    readerHighlightGray: Color(0x4DBDBDBD),
   );
 
   @override
@@ -79,6 +165,25 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? star,
     Color? success,
     Color? error,
+    Color? readerWhiteBg,
+    Color? readerWhiteText,
+    Color? readerWhiteMuted,
+    Color? readerSepiaBg,
+    Color? readerSepiaText,
+    Color? readerSepiaMuted,
+    Color? readerGrayBg,
+    Color? readerGrayText,
+    Color? readerGrayMuted,
+    Color? readerBlackBg,
+    Color? readerBlackText,
+    Color? readerBlackMuted,
+    Color? readerSelectionTint,
+    Color? readerSelectionHandle,
+    Color? readerHighlightCoral,
+    Color? readerHighlightYellow,
+    Color? readerHighlightBlue,
+    Color? readerHighlightTeal,
+    Color? readerHighlightGray,
   }) {
     return AppColors(
       bg: bg ?? this.bg,
@@ -94,6 +199,25 @@ class AppColors extends ThemeExtension<AppColors> {
       star: star ?? this.star,
       success: success ?? this.success,
       error: error ?? this.error,
+      readerWhiteBg: readerWhiteBg ?? this.readerWhiteBg,
+      readerWhiteText: readerWhiteText ?? this.readerWhiteText,
+      readerWhiteMuted: readerWhiteMuted ?? this.readerWhiteMuted,
+      readerSepiaBg: readerSepiaBg ?? this.readerSepiaBg,
+      readerSepiaText: readerSepiaText ?? this.readerSepiaText,
+      readerSepiaMuted: readerSepiaMuted ?? this.readerSepiaMuted,
+      readerGrayBg: readerGrayBg ?? this.readerGrayBg,
+      readerGrayText: readerGrayText ?? this.readerGrayText,
+      readerGrayMuted: readerGrayMuted ?? this.readerGrayMuted,
+      readerBlackBg: readerBlackBg ?? this.readerBlackBg,
+      readerBlackText: readerBlackText ?? this.readerBlackText,
+      readerBlackMuted: readerBlackMuted ?? this.readerBlackMuted,
+      readerSelectionTint: readerSelectionTint ?? this.readerSelectionTint,
+      readerSelectionHandle: readerSelectionHandle ?? this.readerSelectionHandle,
+      readerHighlightCoral: readerHighlightCoral ?? this.readerHighlightCoral,
+      readerHighlightYellow: readerHighlightYellow ?? this.readerHighlightYellow,
+      readerHighlightBlue: readerHighlightBlue ?? this.readerHighlightBlue,
+      readerHighlightTeal: readerHighlightTeal ?? this.readerHighlightTeal,
+      readerHighlightGray: readerHighlightGray ?? this.readerHighlightGray,
     );
   }
 
@@ -114,6 +238,25 @@ class AppColors extends ThemeExtension<AppColors> {
       :star,
       :success,
       :error,
+      :readerWhiteBg,
+      :readerWhiteText,
+      :readerWhiteMuted,
+      :readerSepiaBg,
+      :readerSepiaText,
+      :readerSepiaMuted,
+      :readerGrayBg,
+      :readerGrayText,
+      :readerGrayMuted,
+      :readerBlackBg,
+      :readerBlackText,
+      :readerBlackMuted,
+      :readerSelectionTint,
+      :readerSelectionHandle,
+      :readerHighlightCoral,
+      :readerHighlightYellow,
+      :readerHighlightBlue,
+      :readerHighlightTeal,
+      :readerHighlightGray,
     ) = other;
     return AppColors(
       bg: Color.lerp(this.bg, bg, t)!,
@@ -129,6 +272,25 @@ class AppColors extends ThemeExtension<AppColors> {
       star: Color.lerp(this.star, star, t)!,
       success: Color.lerp(this.success, success, t)!,
       error: Color.lerp(this.error, error, t)!,
+      readerWhiteBg: Color.lerp(this.readerWhiteBg, readerWhiteBg, t)!,
+      readerWhiteText: Color.lerp(this.readerWhiteText, readerWhiteText, t)!,
+      readerWhiteMuted: Color.lerp(this.readerWhiteMuted, readerWhiteMuted, t)!,
+      readerSepiaBg: Color.lerp(this.readerSepiaBg, readerSepiaBg, t)!,
+      readerSepiaText: Color.lerp(this.readerSepiaText, readerSepiaText, t)!,
+      readerSepiaMuted: Color.lerp(this.readerSepiaMuted, readerSepiaMuted, t)!,
+      readerGrayBg: Color.lerp(this.readerGrayBg, readerGrayBg, t)!,
+      readerGrayText: Color.lerp(this.readerGrayText, readerGrayText, t)!,
+      readerGrayMuted: Color.lerp(this.readerGrayMuted, readerGrayMuted, t)!,
+      readerBlackBg: Color.lerp(this.readerBlackBg, readerBlackBg, t)!,
+      readerBlackText: Color.lerp(this.readerBlackText, readerBlackText, t)!,
+      readerBlackMuted: Color.lerp(this.readerBlackMuted, readerBlackMuted, t)!,
+      readerSelectionTint: Color.lerp(this.readerSelectionTint, readerSelectionTint, t)!,
+      readerSelectionHandle: Color.lerp(this.readerSelectionHandle, readerSelectionHandle, t)!,
+      readerHighlightCoral: Color.lerp(this.readerHighlightCoral, readerHighlightCoral, t)!,
+      readerHighlightYellow: Color.lerp(this.readerHighlightYellow, readerHighlightYellow, t)!,
+      readerHighlightBlue: Color.lerp(this.readerHighlightBlue, readerHighlightBlue, t)!,
+      readerHighlightTeal: Color.lerp(this.readerHighlightTeal, readerHighlightTeal, t)!,
+      readerHighlightGray: Color.lerp(this.readerHighlightGray, readerHighlightGray, t)!,
     );
   }
 }

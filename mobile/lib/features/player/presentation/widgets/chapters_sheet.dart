@@ -93,11 +93,11 @@ class _SheetHeader extends StatelessWidget {
       child: Text(
         'Оглавление',
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        overflow: .ellipsis,
         style: TextStyle(
           color: textPrimary,
           fontSize: 26,
-          fontWeight: FontWeight.w800,
+          fontWeight: .w800,
           height: 1.1,
         ),
       ),
@@ -148,7 +148,7 @@ class _ChapterRow extends StatelessWidget {
               child: Text(
                 chapter.title,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
                 style: TextStyle(
                   color: titleColor,
                   fontSize: 18,
@@ -163,7 +163,7 @@ class _ChapterRow extends StatelessWidget {
               style: TextStyle(
                 color: textTertiary,
                 fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
