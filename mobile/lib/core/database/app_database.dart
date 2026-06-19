@@ -39,7 +39,7 @@ class Books extends Table {
 class BookChapters extends Table {
   TextColumn get id => text()();
   TextColumn get bookId =>
-      text().references(Books, #id, onDelete: KeyAction.cascade)();
+      text().references(Books, #id, onDelete: .cascade)();
   IntColumn get position => integer()();
   TextColumn get filePath => text()();
   TextColumn get title => text().nullable()();
@@ -53,7 +53,7 @@ class BookChapters extends Table {
 @DataClassName('AudioProgressRow')
 class AudioProgress extends Table {
   TextColumn get bookId =>
-      text().references(Books, #id, onDelete: KeyAction.cascade)();
+      text().references(Books, #id, onDelete: .cascade)();
   IntColumn get chapterIndex => integer()();
   IntColumn get positionMs => integer()();
   DateTimeColumn get updatedAt => dateTime()();
@@ -66,7 +66,7 @@ class AudioProgress extends Table {
 class AudioBookmarks extends Table {
   TextColumn get id => text()();
   TextColumn get bookId =>
-      text().references(Books, #id, onDelete: KeyAction.cascade)();
+      text().references(Books, #id, onDelete: .cascade)();
   IntColumn get chapterIndex => integer()();
   IntColumn get positionMs => integer()();
   TextColumn get title => text()();

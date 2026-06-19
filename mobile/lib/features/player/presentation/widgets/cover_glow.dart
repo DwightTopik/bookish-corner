@@ -111,7 +111,7 @@ class _CoverGlowState extends State<CoverGlow> {
                   width: widget.size,
                   height: widget.size,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    shape: .circle,
                     color: glowColor.withValues(alpha: 0.7),
                   ),
                 ),
@@ -127,7 +127,7 @@ class _CoverGlowState extends State<CoverGlow> {
               child: hasCover
                   ? Image.file(
                       File(coverPath),
-                      fit: BoxFit.cover,
+                      fit: .cover,
                       key: ValueKey(_resolvedPath ?? coverPath),
                     )
                   : ColoredBox(

@@ -69,7 +69,7 @@ class BookListTile extends ConsumerWidget {
           child: Padding(
             padding: const .all(12),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               children: [
                 _BookCover(book: book),
                 const Gap(12),
@@ -131,7 +131,7 @@ class _CoverImage extends StatelessWidget {
     if (localPath != null) {
       return Image.file(
         File(localPath),
-        fit: BoxFit.cover,
+        fit: .cover,
         errorBuilder: (_, _, _) => const _CoverPlaceholder(),
       );
     }
@@ -139,7 +139,7 @@ class _CoverImage extends StatelessWidget {
     if (url != null) {
       return CachedNetworkImage(
         imageUrl: url,
-        fit: BoxFit.cover,
+        fit: .cover,
         placeholder: (context, _) => const _CoverPlaceholder(),
         errorWidget: (context, _, _) => const _CoverPlaceholder(),
       );
@@ -167,7 +167,7 @@ class _ProgressIndicator extends StatelessWidget {
           'Прочитано',
           style: TextStyle(
             fontSize: 11,
-            fontWeight: FontWeight.w500,
+            fontWeight: .w500,
             color: Colors.white,
           ),
         ),
@@ -208,15 +208,15 @@ class _BookInfo extends StatelessWidget {
     final AppColors(:textPrimary, :textSecondary, :textTertiary, :star) =
         context.appColors;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         Text(
           book.title,
           maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+          overflow: .ellipsis,
           style: TextStyle(
             fontSize: 15,
-            fontWeight: FontWeight.w600,
+            fontWeight: .w600,
             color: textPrimary,
           ),
         ),
@@ -224,7 +224,7 @@ class _BookInfo extends StatelessWidget {
         Text(
           book.author,
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          overflow: .ellipsis,
           style: TextStyle(fontSize: 13, color: textSecondary),
         ),
         if (book.format.isAudio && book.narrator != null) ...[
@@ -232,7 +232,7 @@ class _BookInfo extends StatelessWidget {
           Text(
             'Читает: ${book.narrator}',
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            overflow: .ellipsis,
             style: TextStyle(fontSize: 12, color: textTertiary),
           ),
         ],
@@ -281,7 +281,7 @@ class _FormatBadge extends StatelessWidget {
         border: .fromBorderSide(.new(color: border)),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           if (book.format.isAudio) ...[
             Icon(Icons.headphones, size: 12, color: textSecondary),
@@ -291,7 +291,7 @@ class _FormatBadge extends StatelessWidget {
             book.format.label,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w500,
+              fontWeight: .w500,
               color: textSecondary,
             ),
           ),
@@ -318,7 +318,7 @@ class _StatusRow extends StatelessWidget {
             '$percent%',
             style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+              fontWeight: .w600,
               color: textPrimary,
             ),
           ),
@@ -332,10 +332,10 @@ class _StatusRow extends StatelessWidget {
               ),
               child: Text(
                 label,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: .w500,
                   color: accent,
                 ),
               ),

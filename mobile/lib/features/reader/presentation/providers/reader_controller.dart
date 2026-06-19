@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/core/di/repository_providers.dart';
+import 'package:bookish_corner/features/library/domain/reading_status.dart';
 import 'package:bookish_corner/features/reader/domain/reader_bookmark.dart';
 import 'package:bookish_corner/features/reader/domain/reader_engine.dart';
 import 'package:bookish_corner/features/reader/domain/reader_locator.dart';
@@ -36,6 +37,7 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
   StreamSubscription<ReaderSelection>? _selectionSub;
   StreamSubscription<List<ReaderBookmark>>? _bookmarkSub;
   List<ReaderBookmark> _bookmarks = [];
+  Timer? _saveTimer;
 
   // Последнее известное состояние. Держим отдельно, чтобы при бенайн-пересборке
   // build (тот же инстанс движка) вернуть накопленный снимок, а не сбрасывать
@@ -91,10 +93,23 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
     try {
       await engine.open();
       if (!ref.mounted) return;
-      _set(_last.copyWith(status: ReaderStatus.ready, toc: engine.toc));
+      _set(_last.copyWith(status: .ready, toc: engine.toc));
+      // Восстановить позицию из Drift: если есть сохранённый anchor → goTo
+      // (мгновенный jump без анимации). Пока вью не смонтирована, jumpToOffset
+      // сохранится как pendingJump в Fb2RenderController и будет применён
+      // в _bindEngine() через post-frame callback.
+      final saved = await ref
+          .read(readerProgressRepositoryProvider)
+          .getProgress(_bookId);
+      if (!ref.mounted) return;
+      if (saved != null &&
+          saved.anchor.isNotEmpty &&
+          saved.anchor != '0:0') {
+        await engine.goTo(saved);
+      }
     } catch (e) {
       if (!ref.mounted) return;
-      _set(_last.copyWith(status: ReaderStatus.error, error: e));
+      _set(_last.copyWith(status: .error, error: e));
     }
   }
 
@@ -104,6 +119,23 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
     final isBookmarked =
         charOffset >= 0 && _bookmarks.any((b) => b.charOffset == charOffset);
     _set(_last.copyWith(progress: progress, isBookmarked: isBookmarked));
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 1500), () {
+      _saveProgressToDrift(progress.locator);
+    });
+  }
+
+  Future<void> _saveProgressToDrift(ReaderLocator locator) async {
+    if (!ref.mounted) return;
+    await ref.read(readerProgressRepositoryProvider).saveProgress(_bookId, locator);
+    if (!ref.mounted) return;
+    if (locator.progress > 0) {
+      await ref.read(bookRepositoryProvider).updateProgress(
+        _bookId, locator.progress, locator.anchor);
+      if (!ref.mounted) return;
+      await ref.read(bookRepositoryProvider).updateStatus(
+        _bookId, ReadingStatus.reading);
+    }
   }
 
   void _onSelection(ReaderSelection selection) {
@@ -181,5 +213,6 @@ class ReaderControllerNotifier extends Notifier<ReaderUiState> {
     _progressSub?.cancel();
     _selectionSub?.cancel();
     _bookmarkSub?.cancel();
+    _saveTimer?.cancel();
   }
 }

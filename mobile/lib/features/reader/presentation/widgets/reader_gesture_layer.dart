@@ -33,7 +33,7 @@ class ReaderGestureLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: .opaque,
       onHorizontalDragEnd: _onHorizontalDragEnd,
       child: Row(
         children: [
@@ -63,7 +63,7 @@ class _ReaderTapZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: .opaque,
       onTap: onTap,
       child: const SizedBox.expand(),
     );

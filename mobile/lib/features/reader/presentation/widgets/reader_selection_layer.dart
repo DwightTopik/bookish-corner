@@ -387,7 +387,7 @@ class _ReaderSelectionLayerState extends ConsumerState<ReaderSelectionLayer> {
               width: width,
               height: height,
               child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
+                behavior: .translucent,
                 onTap: () => _onAnnotationTap(
                   annotation,
                   Rect.fromLTWH(left, top, width, height),
@@ -424,7 +424,7 @@ class _ReaderSelectionLayerState extends ConsumerState<ReaderSelectionLayer> {
         if (!active && _tappedAnnotation != null && _highlightMenuAnchor != null)
           Positioned.fill(
             child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
+              behavior: .opaque,
               onTap: _dismissHighlightMenu,
             ),
           ),
@@ -640,7 +640,7 @@ class _MenuSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: .opaque,
       onTap: () {},
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -729,20 +729,8 @@ class _MenuBar extends StatelessWidget {
     return _MenuSurface(
       palette: palette,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
-          _MenuButton(
-            icon: Icons.content_copy,
-            label: 'Скопировать',
-            palette: palette,
-            onTap: onCopy,
-          ),
-          _MenuButton(
-            icon: Icons.ios_share,
-            label: 'Поделиться',
-            palette: palette,
-            onTap: onShare,
-          ),
           _MenuButton(
             icon: Icons.format_quote,
             label: 'Цитата',
@@ -754,6 +742,18 @@ class _MenuBar extends StatelessWidget {
             label: 'Заметка',
             palette: palette,
             onTap: onNote,
+          ),
+          _MenuButton(
+            icon: Icons.content_copy,
+            label: 'Скопировать',
+            palette: palette,
+            onTap: onCopy,
+          ),
+          _MenuButton(
+            icon: Icons.ios_share,
+            label: 'Поделиться',
+            palette: palette,
+            onTap: onShare,
           ),
         ],
       ),
@@ -783,7 +783,7 @@ class _MenuButton extends StatelessWidget {
       child: Padding(
         padding: const .symmetric(horizontal: 8, vertical: 8),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Icon(icon, size: AppDimensions.readerMenuIconSize, color: color),
             const Gap(4),
@@ -792,7 +792,7 @@ class _MenuButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 color: color,
-                fontWeight: FontWeight.w500,
+                fontWeight: .w500,
               ),
             ),
           ],
@@ -824,7 +824,7 @@ class _HighlightActionBar extends StatelessWidget {
     return _MenuSurface(
       palette: palette,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           _MenuButton(
             icon: Icons.delete_outline,

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show compute, visibleForTesting;
 import 'package:path/path.dart' as p;
 
 import 'package:bookish_corner/features/library/domain/book_format.dart';
@@ -19,6 +19,21 @@ import 'package:bookish_corner/features/reader/domain/reader_search_result.dart'
 import 'package:bookish_corner/features/reader/domain/reader_selection.dart';
 import 'package:bookish_corner/features/reader/domain/reader_settings.dart';
 import 'package:bookish_corner/features/reader/domain/toc_entry.dart';
+
+// ── Isolate-safe парсинг ─────────────────────────────────────────────────────
+//
+// compute() передаёт только Dart-объекты (String, BookFormat, String).
+// ui.Image создаются ПОСЛЕ compute на main thread (_decodeImages).
+
+typedef _ParseArgs = (String raw, BookFormat format, String fallbackTitle);
+
+ReaderDocument _parseIsolate(_ParseArgs args) {
+  final (raw, format, fallbackTitle) = args;
+  return switch (format) {
+    .fb2 => Fb2Parser.parse(raw, fallbackTitle: fallbackTitle),
+    _    => TxtParser.parse(raw, title: fallbackTitle),
+  };
+}
 
 /// [ReaderEngine] для текстовых форматов (fb2/txt). Headless-часть (B1a): парсит
 /// файл в [ReaderDocument] и ведёт позицию по СИМВОЛЬНОМУ смещению
@@ -110,7 +125,12 @@ class Fb2ReaderEngine implements ReaderEngine {
     if (_opened) return;
     _opened = true;
     final raw = await _readFile();
-    _document = _parse(raw);
+    final title = (fallbackTitle?.trim().isNotEmpty ?? false)
+        ? fallbackTitle!.trim()
+        : p.basenameWithoutExtension(filePath);
+    // Парсинг XML/текста — в isolate (не блокирует main, спиннер крутится плавно).
+    // Декод картинок остаётся на main: ui.Image не пересекает границу isolate.
+    _document = await compute(_parseIsolate, (raw, format, title));
     await _decodeImages();
     _toc = _buildToc();
     _locator = const ReaderLocator(progress: 0, anchor: '0:0', chapterIndex: 0);
@@ -275,16 +295,7 @@ class Fb2ReaderEngine implements ReaderEngine {
     }
   }
 
-  ReaderDocument _parse(String raw) {
-    final title = (fallbackTitle?.trim().isNotEmpty ?? false)
-        ? fallbackTitle!.trim()
-        : p.basenameWithoutExtension(filePath);
-    return switch (format) {
-      .fb2 => Fb2Parser.parse(raw, fallbackTitle: title),
-      .txt => TxtParser.parse(raw, title: title),
-      _ => TxtParser.parse(raw, title: title),
-    };
-  }
+
 
   List<TocEntry> _buildToc() {
     return [

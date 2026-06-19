@@ -9,7 +9,7 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           spacing: 24,
           children: [
             const Text('Profile'),

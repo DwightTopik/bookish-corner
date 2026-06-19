@@ -42,11 +42,11 @@ class ReaderBottomPanel extends StatelessWidget {
         vertical: AppDimensions.readerPanelVPadding,
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               Expanded(
                 child: Row(
@@ -60,12 +60,12 @@ class ReaderBottomPanel extends StatelessWidget {
                     Expanded(
                       child: Text(
                         chapterTitle,
-                        overflow: TextOverflow.ellipsis,
+                        overflow: .ellipsis,
                         maxLines: 1,
                         style: TextStyle(
                           color: palette.text,
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: .w600,
                         ),
                       ),
                     ),
@@ -177,12 +177,12 @@ class _ProgressFooterRow extends StatelessWidget {
             style: TextStyle(
               color: palette.muted,
               fontSize: 13,
-              fontWeight: FontWeight.w500,
+              fontWeight: .w500,
             ),
           ),
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: .spaceBetween,
           children: [
             if (canGoBack)
               TextButton(onPressed: onBack, child: const Text('Назад'))

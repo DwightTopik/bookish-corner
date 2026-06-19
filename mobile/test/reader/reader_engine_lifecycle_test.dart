@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/core/theme/app_theme.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
-import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/reader/data/fb2_reader_engine.dart';
 import 'package:bookish_corner/features/reader/presentation/providers/reader_book_provider.dart';
 import 'package:bookish_corner/features/reader/presentation/widgets/reader_chapters_sheet.dart';
@@ -78,7 +77,7 @@ void main() {
         title: 'Жизненный цикл',
         author: 'Тест',
         filePath: tmp.path,
-        format: BookFormat.txt,
+        format: .txt,
         addedAt: DateTime(2026),
       );
 

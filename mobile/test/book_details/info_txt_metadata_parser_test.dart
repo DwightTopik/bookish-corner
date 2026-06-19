@@ -7,7 +7,6 @@ import 'package:bookish_corner/features/book_details/data/info_txt_metadata_pars
 import 'package:bookish_corner/features/book_details/data/info_txt_metadata_source.dart';
 import 'package:bookish_corner/features/book_details/domain/book_details_metadata.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
-import 'package:bookish_corner/features/library/domain/book_format.dart';
 
 void main() {
   group('InfoTxtMetadataParser', () {
@@ -177,7 +176,7 @@ ISBN: 978-5-389-20464-5 Правообладатель: Азбука-Аттик�
           author: 'Local author',
           narrator: 'Local narrator',
           filePath: 'book.mp3',
-          format: BookFormat.mp3,
+          format: .mp3,
           addedAt: DateTime(2026),
           description: 'Local description',
         ),
@@ -260,7 +259,7 @@ ISBN: 978-5-389-20464-5 Правообладатель: Азбука-Аттик�
           title: 'Ученик убийцы',
           author: 'Робин Хобб',
           filePath: bookDir.path,
-          format: BookFormat.audioFolder,
+          format: .audioFolder,
           addedAt: DateTime(2026),
         ),
       );

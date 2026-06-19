@@ -37,16 +37,16 @@ class HighlightSwatch extends StatelessWidget {
             height: _kSwatchSize,
             decoration: BoxDecoration(
               color: swatchColor,
-              shape: BoxShape.circle,
-              border: isSelected
-                  ? Border.fromBorderSide(
-                      BorderSide(
-                        color: swatchColor,
-                        width: _kSwatchRingWidth + _kSwatchRingGap,
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                      ),
-                    )
-                  : null,
+              shape: .circle,
+              // Всегда передаём Border — AnimatedContainer плавно интерполирует
+              // цвет от transparent до swatchColor (при null→Border была резкость).
+              border: .fromBorderSide(
+                BorderSide(
+                  color: isSelected ? swatchColor : Colors.transparent,
+                  width: _kSwatchRingWidth + _kSwatchRingGap,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+              ),
             ),
           ),
         ),

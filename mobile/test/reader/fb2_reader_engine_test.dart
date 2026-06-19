@@ -155,7 +155,7 @@ void main() {
     test('txt-формат: одна глава, search по тексту работает', () async {
       final engine = await openEngine(
         'Первый абзац поиск.\n\nВторой абзац.',
-        format: BookFormat.txt,
+        format: .txt,
       );
       await engine.open();
 
@@ -169,6 +169,51 @@ void main() {
 
       await engine.dispose();
       await engine.dispose();
+    });
+
+    group('прогресс-restore headless', () {
+      test('goTo до монтирования вью сохраняет pendingJump в renderController',
+          () async {
+        // Имитируем restore при открытии: open() → goTo(saved) → вью ещё
+        // не смонтирована (onJump == null). Ожидаем pending jump в rc.
+        final engine = await openEngine(_mathFb2);
+        await engine.open();
+        await pump();
+
+        // onJump не выставлен (вью не смонтирована) → jump должен стать pending.
+        expect(engine.renderController.onJump, isNull);
+
+        await engine.goTo(
+          const ReaderLocator(progress: 0, anchor: '1:3', chapterIndex: 1),
+        );
+
+        final pending = engine.renderController.takePendingJump();
+        expect(pending, isNotNull);
+        expect(pending!.$1, equals(1)); // chapterIndex
+        expect(pending.$2, equals(3)); // charOffset
+      });
+
+      test('goTo при смонтированной вью вызывает onJump, pending не остаётся',
+          () async {
+        final engine = await openEngine(_mathFb2);
+        await engine.open();
+        await pump();
+
+        int? gotoCi;
+        int? gotoOffset;
+        engine.renderController.onJump = (ci, off) {
+          gotoCi = ci;
+          gotoOffset = off;
+        };
+
+        await engine.goTo(
+          const ReaderLocator(progress: 0, anchor: '1:5', chapterIndex: 1),
+        );
+
+        expect(gotoCi, equals(1));
+        expect(gotoOffset, equals(5));
+        expect(engine.renderController.takePendingJump(), isNull);
+      });
     });
   });
 }

@@ -30,7 +30,7 @@ class ScaffoldWithNav extends StatelessWidget {
           index,
           initialLocation: index == navigationShell.currentIndex,
         ),
-        type: BottomNavigationBarType.fixed,
+        type: .fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book_outlined),

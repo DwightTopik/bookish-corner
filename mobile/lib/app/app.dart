@@ -13,7 +13,7 @@ class BookishApp extends ConsumerWidget {
       routerConfig: ref.watch(goRouterProvider),
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
-      themeMode: ThemeMode.system,
+      themeMode: .system,
       debugShowCheckedModeBanner: false,
     );
   }

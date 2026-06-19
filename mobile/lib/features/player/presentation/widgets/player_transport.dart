@@ -27,7 +27,7 @@ class PlayerTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppColors(:textPrimary, :bg) = context.appColors;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: [
         IconButton(
           tooltip: 'Предыдущая глава',

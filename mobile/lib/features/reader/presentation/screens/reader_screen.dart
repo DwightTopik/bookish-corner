@@ -195,7 +195,7 @@ class _ReaderReadyView extends ConsumerWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(color: palette.bg),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: .min,
                     children: [
                       ReaderBottomPanel(
                         state: state,

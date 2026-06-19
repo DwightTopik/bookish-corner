@@ -11,7 +11,6 @@ import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/core/di/repository_providers.dart';
 import 'package:bookish_corner/core/theme/app_theme.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
-import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/reader/domain/reader_bookmark.dart';
 import 'package:bookish_corner/features/reader/domain/reader_bookmark_repository.dart';
 import 'package:bookish_corner/features/reader/domain/reader_capabilities.dart';
@@ -34,7 +33,7 @@ final _book = Book(
   title: 'Тестовая книга',
   author: 'Автор Тестов',
   filePath: '/tmp/book.epub',
-  format: BookFormat.epub,
+  format: .epub,
   addedAt: DateTime(2026),
 );
 

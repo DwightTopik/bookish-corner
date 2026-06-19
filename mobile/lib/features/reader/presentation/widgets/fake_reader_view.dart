@@ -43,15 +43,15 @@ class FakeReaderView extends ConsumerWidget {
           vertical: AppDimensions.readerContentVPadding,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: .start,
+          mainAxisAlignment: .center,
           children: [
             Text(
               'Глава ${chapterIndex + 1} · стр $currentPage из $totalPages',
               style: TextStyle(
                 color: textSecondary,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
                 letterSpacing: 0.4,
               ),
             ),

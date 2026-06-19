@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -108,6 +110,10 @@ class _ReaderNoteEditorScreenState
 
     return Scaffold(
       backgroundColor: bg,
+      // resizeToAvoidBottomInset: false — тело не сжимается при анимации
+      // клавиатуры. Нижний отступ управляется через viewInsetsOf вручную:
+      // color picker плавно едет вверх вместе с клавиатурой.
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
@@ -118,7 +124,7 @@ class _ReaderNoteEditorScreenState
         title: book == null
             ? null
             : Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: .min,
                 children: [
                   Text(
                     book.author,
@@ -131,7 +137,7 @@ class _ReaderNoteEditorScreenState
                     book.title,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: .w600,
                       color: text,
                     ),
                   ),
@@ -156,13 +162,13 @@ class _ReaderNoteEditorScreenState
           vertical: 16,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             // Цитируемый текст с цветной левой полосой.
             IntrinsicHeight(
               child: Row(
                 spacing: 10,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: .stretch,
                 children: [
                   Container(
                     width: 3,
@@ -182,7 +188,7 @@ class _ReaderNoteEditorScreenState
                         widget.text,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: .w600,
                           color: text,
                           height: 1.4,
                         ),
@@ -199,13 +205,13 @@ class _ReaderNoteEditorScreenState
                 controller: _noteCtrl,
                 maxLines: null,
                 expands: true,
-                textAlignVertical: TextAlignVertical.top,
+                textAlignVertical: .top,
                 decoration: InputDecoration(
                   hintText: 'Напишите пару строк',
                   hintStyle: TextStyle(
                     color: muted,
                   ),
-                  border: InputBorder.none,
+                  border: .none,
                 ),
                 style: TextStyle(
                   fontSize: 15,
@@ -219,7 +225,12 @@ class _ReaderNoteEditorScreenState
               selected: _color,
               onSelect: (c) => setState(() => _color = c),
             ),
-            Gap(MediaQuery.paddingOf(context).bottom + 8),
+            // Нижний отступ: берём максимум keyboard/safe-area, чтобы color
+            // picker плавно поднимался с клавиатурой (resizeToAvoidBottomInset: false).
+            Gap(math.max(
+              MediaQuery.viewInsetsOf(context).bottom,
+              MediaQuery.paddingOf(context).bottom,
+            ) + 8),
           ],
         ),
       ),

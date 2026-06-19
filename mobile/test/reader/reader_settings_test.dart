@@ -90,12 +90,12 @@ void main() {
     test('saves and restores all fields', () async {
       final prefs = await SharedPreferences.getInstance();
       const settings = ReaderSettings(
-        background: ReaderBackground.sepia,
+        background: .sepia,
         useSystemBrightness: false,
         brightness: 0.6,
         fontFamily: 'PTSerif',
         fontSizeStep: 2,
-        textAlign: ReaderTextAlign.justify,
+        textAlign: .justify,
         marginStep: 2,
         lineSpacingStep: 0,
       );

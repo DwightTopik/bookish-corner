@@ -49,7 +49,7 @@ class ReaderSettingsSheet extends ConsumerWidget {
         child: SafeArea(
           top: false,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               const _DragHandle(),
               // ── Тема (pill-чипы) ──────────────────────────────────────────
@@ -208,7 +208,7 @@ class _BackgroundRow extends StatelessWidget {
       (ReaderBackground.system, 'Как в системе'),
     ];
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+      scrollDirection: .horizontal,
       padding: const .symmetric(
         horizontal: AppDimensions.screenHPadding,
         vertical: 10,
@@ -337,12 +337,12 @@ class _FontAndSizeRow extends StatelessWidget {
         vertical: 4,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: .center,
         children: [
           // ── Left: font carousel + dots below ────────────────────────────
           Expanded(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: [
                 SizedBox(
                   height: AppDimensions.readerSettingsControlHeight,
@@ -357,12 +357,12 @@ class _FontAndSizeRow extends StatelessWidget {
                       Expanded(
                         child: Text(
                           label,
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                           style: TextStyle(
                             fontFamily: family,
                             fontSize: 16,
                             color: colors.textPrimary,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: .w500,
                           ),
                         ),
                       ),
@@ -377,7 +377,7 @@ class _FontAndSizeRow extends StatelessWidget {
                 ),
                 // Dots — centered under the font name segment
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: .center,
                   spacing: AppDimensions.readerSettingsDotSpacing,
                   children: [
                     for (int i = 0; i < _fontKeys.length; i++)
@@ -387,7 +387,7 @@ class _FontAndSizeRow extends StatelessWidget {
                         height: AppDimensions.readerSettingsDotSize,
                         decoration: BoxDecoration(
                           color: i == idx ? colors.accent : colors.border,
-                          shape: BoxShape.circle,
+                          shape: .circle,
                         ),
                       ),
                   ],
@@ -417,7 +417,7 @@ class _FontAndSizeRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 color: colors.textPrimary,
-                fontWeight: FontWeight.w500,
+                fontWeight: .w500,
               ),
             ),
           ),

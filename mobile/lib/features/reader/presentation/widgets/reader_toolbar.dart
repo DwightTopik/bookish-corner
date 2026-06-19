@@ -40,7 +40,7 @@ class ReaderToolbar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: [
             _ToolbarAction(
               icon: Icons.format_list_bulleted,

@@ -195,7 +195,7 @@ class _BookmarkTitleDialogState extends State<_BookmarkTitleDialog> {
         controller: _controller,
         autofocus: true,
         maxLines: 1,
-        textInputAction: TextInputAction.done,
+        textInputAction: .done,
         style: TextStyle(color: textPrimary),
         decoration: InputDecoration(
           hintText: widget.defaultTitle,
@@ -248,11 +248,11 @@ class _SheetHeader extends StatelessWidget {
       child: Text(
         'Закладки',
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        overflow: .ellipsis,
         style: TextStyle(
           color: textPrimary,
           fontSize: 26,
-          fontWeight: FontWeight.w800,
+          fontWeight: .w800,
           height: 1.1,
         ),
       ),
@@ -281,17 +281,17 @@ class _NewBookmarkRow extends StatelessWidget {
         children: [
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: .center,
+              crossAxisAlignment: .start,
               children: [
                 Text(
                   'Новая закладка',
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: .ellipsis,
                   style: TextStyle(
                     color: textPrimary,
                     fontSize: 18,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: .w800,
                     height: 1.15,
                   ),
                 ),
@@ -299,11 +299,11 @@ class _NewBookmarkRow extends StatelessWidget {
                 Text(
                   '${_chapterLabel(state)} - ${_formatPosition(state.position)}',
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: .ellipsis,
                   style: TextStyle(
                     color: textTertiary,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: .w600,
                   ),
                 ),
               ],
@@ -345,17 +345,17 @@ class _BookmarkRow extends StatelessWidget {
           children: [
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: .center,
+                crossAxisAlignment: .start,
                 children: [
                   Text(
                     bookmark.title,
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    overflow: .ellipsis,
                     style: TextStyle(
                       color: textPrimary,
                       fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: .w700,
                       height: 1.15,
                     ),
                   ),
@@ -363,11 +363,11 @@ class _BookmarkRow extends StatelessWidget {
                   Text(
                     '${bookmark.chapterTitle} - ${_formatPosition(bookmark.position)}',
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    overflow: .ellipsis,
                     style: TextStyle(
                       color: textTertiary,
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: .w600,
                     ),
                   ),
                 ],

@@ -95,7 +95,7 @@ class _TextTheme {
     fontFamily: fontFamilyName,
     fontSize: headingSize,
     height: lineHeight,
-    fontWeight: FontWeight.w700,
+    fontWeight: .w700,
     color: bodyColor,
   );
 
@@ -247,7 +247,7 @@ _ChapterLayout _layoutChapter(
       TextPainter(
         text: TextSpan(children: spans, style: baseStyle),
         textAlign: align,
-        textDirection: TextDirection.ltr,
+        textDirection: .ltr,
       )..layout(maxWidth: contentWidth),
     );
   }
@@ -537,6 +537,16 @@ class _Fb2ReaderViewState extends ConsumerState<Fb2ReaderView>
     rc.onJump = _onJump;
     rc.onRelayout = _onRelayout;
     rc.onGeometry = _buildGeometry;
+    // Применяем отложенный jump (restore прогресса при открытии книги):
+    // goTo() в контроллере вызвался до монтирования вью → onJump был null →
+    // jumpToOffset сохранил pending. Здесь replay в post-frame, чтобы
+    // LayoutBuilder уже выстроил главу и знал её страницы.
+    final pending = rc.takePendingJump();
+    if (pending case (final ci, final offset)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onJump(ci, offset);
+      });
+    }
   }
 
   void _unbindEngine() {

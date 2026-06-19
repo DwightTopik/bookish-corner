@@ -26,11 +26,11 @@ class ReaderImmersiveFooter extends StatelessWidget {
         ),
         child: Text(
           '$currentPage из $totalPages',
-          textAlign: TextAlign.center,
+          textAlign: .center,
           style: TextStyle(
             color: palette.muted.withValues(alpha: 0.8),
             fontSize: 13,
-            fontWeight: FontWeight.w500,
+            fontWeight: .w500,
           ),
         ),
       ),

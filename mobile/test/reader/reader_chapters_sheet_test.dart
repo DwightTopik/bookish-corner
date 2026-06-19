@@ -12,7 +12,6 @@ import 'package:bookish_corner/core/di/repository_providers.dart';
 import 'package:bookish_corner/core/theme/app_colors.dart';
 import 'package:bookish_corner/core/theme/app_theme.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
-import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/reader/domain/reader_capabilities.dart';
 import 'package:bookish_corner/features/reader/domain/reader_bookmark.dart';
 import 'package:bookish_corner/features/reader/domain/reader_bookmark_repository.dart';
@@ -34,7 +33,7 @@ final _book = Book(
   title: 'Тестовая книга',
   author: 'Тест Автор',
   filePath: '/tmp/test.fb2',
-  format: BookFormat.fb2,
+  format: .fb2,
   addedAt: DateTime(2026),
 );
 

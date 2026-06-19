@@ -82,10 +82,16 @@ class Fb2RenderController extends ChangeNotifier {
 
   void prev() => onPrev?.call();
 
-  /// Движок просит вью показать страницу, содержащую [charOffset] в главе
-  /// [chapterIndex] (seek слайдером, переход по TOC/поиску).
-  void jumpToOffset(int chapterIndex, int charOffset) =>
-      onJump?.call(chapterIndex, charOffset);
+  /// Движок просит вью показать страницу с [charOffset] в главе [chapterIndex].
+  /// Если вью ещё не смонтирована (onJump == null) — сохраняет как pending;
+  /// вью заберёт его в _bindEngine() через [takePendingJump].
+  void jumpToOffset(int chapterIndex, int charOffset) {
+    if (onJump != null) {
+      onJump!(chapterIndex, charOffset);
+    } else {
+      _pendingJump = (chapterIndex, charOffset);
+    }
+  }
 
   /// Применение `ReaderSettings`: вью пере-пагинирует, сохраняя позицию.
   void relayout() => onRelayout?.call();
@@ -133,6 +139,21 @@ class Fb2RenderController extends ChangeNotifier {
   // (`_SlideCanvas`), а логическая позиция репортится мгновенно. Чтобы хайлайт
   // «ехал» вместе с входящей страницей, вью отдаёт сюда анимацию слайда, а
   // overlay читает [incomingSlideDx] и слушает [pageSlide].
+
+  // ── Pending jump (прогресс-restore до монтирования вью) ──────────────────
+  //
+  // Если goTo() вызывается до того, как вью выставила onJump (экран ещё не
+  // смонтирован), сохраняем аргументы сюда. _bindEngine() в вью заберёт их
+  // через takePendingJump() и вызовет _onJump в post-frame callback.
+
+  (int chapterIndex, int charOffset)? _pendingJump;
+
+  /// Забирает и очищает отложенный jump (однократно). Вызывается из _bindEngine.
+  (int, int)? takePendingJump() {
+    final j = _pendingJump;
+    _pendingJump = null;
+    return j;
+  }
 
   Animation<double>? _pageSlide;
   int _pageSlideDir = 1;

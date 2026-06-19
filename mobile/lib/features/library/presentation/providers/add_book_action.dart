@@ -18,7 +18,7 @@ import 'package:bookish_corner/features/library/utils/book_metadata_extractor.da
 
 Future<void> pickAndAddBook(BuildContext context, WidgetRef ref) async {
   final result = await FilePicker.pickFiles(
-    type: FileType.custom,
+    type: .custom,
     allowedExtensions: BookFormat.pickerExtensions,
   );
   if (!context.mounted) return;
@@ -260,7 +260,7 @@ Future<void> pickAndAddFolder(
     author: metaAuthor,
     narrator: metaNarrator,
     filePath: folderPath,
-    format: BookFormat.audioFolder,
+    format: .audioFolder,
     addedAt: DateTime.now(),
     coverImagePath: coverPath,
   );

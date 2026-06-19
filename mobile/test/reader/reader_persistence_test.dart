@@ -119,6 +119,23 @@ void main() {
       final result = await repo.getProgress('unknown');
       expect(result, isNull);
     });
+
+    test('saveProgress сохраняет charOffset из anchor и percent', () async {
+      // anchor '3:4200' → chapter=3, charOffset=4200, progress=0.72
+      const loc = ReaderLocator(
+          progress: 0.72, anchor: '3:4200', chapterIndex: 3);
+      await repo.saveProgress('book1', loc);
+      final row =
+          await (db.select(db.readerProgress)..where((t) => t.bookId.equals('book1')))
+              .getSingleOrNull();
+      expect(row, isNotNull);
+      expect(row!.charOffset, equals(4200));
+      expect(row.chapterIndex, equals(3));
+      expect(row.percent, closeTo(0.72, 0.0001));
+      // getProgress пересобирает anchor правильно
+      final restored = await repo.getProgress('book1');
+      expect(restored!.anchor, equals('3:4200'));
+    });
   });
 
   group('ReaderBookmarks', () {
@@ -189,22 +206,22 @@ void main() {
       charStart: 10,
       charEnd: 50,
       text: 'annotation text $id',
-      color: HighlightColor.coral,
+      color: .coral,
       createdAt: DateTime(2026),
     );
 
     test('addAnnotation → watchAnnotations без фильтра возвращает обе', () async {
-      await repo.addAnnotation(ann('q1', ReaderAnnotationType.quote));
+      await repo.addAnnotation(ann('q1', .quote));
       await repo.addAnnotation(ann('n1', ReaderAnnotationType.note));
       final list = await repo.watchAnnotations('book3').first;
       expect(list, hasLength(2));
     });
 
     test('watchAnnotations с фильтром quote возвращает только цитаты', () async {
-      await repo.addAnnotation(ann('q2', ReaderAnnotationType.quote));
+      await repo.addAnnotation(ann('q2', .quote));
       await repo.addAnnotation(ann('n2', ReaderAnnotationType.note));
       final quotes = await repo
-          .watchAnnotations('book3', type: ReaderAnnotationType.quote)
+          .watchAnnotations('book3', type: .quote)
           .first;
       expect(quotes, hasLength(1));
       expect(quotes.first.type, equals(ReaderAnnotationType.quote));
@@ -219,7 +236,7 @@ void main() {
     });
 
     test('removeAnnotation удаляет запись', () async {
-      await repo.addAnnotation(ann('q3', ReaderAnnotationType.quote));
+      await repo.addAnnotation(ann('q3', .quote));
       await repo.removeAnnotation('q3');
       final list = await repo.watchAnnotations('book3').first;
       expect(list.where((a) => a.id == 'q3'), isEmpty);
@@ -230,11 +247,11 @@ void main() {
         ReaderAnnotation(
           id: 'col1',
           bookId: 'book3',
-          type: ReaderAnnotationType.quote,
+          type: .quote,
           charStart: 1,
           charEnd: 10,
           text: 'colored',
-          color: HighlightColor.teal,
+          color: .teal,
           createdAt: DateTime(2026),
         ),
       );
@@ -243,7 +260,7 @@ void main() {
     });
 
     test('updateColor меняет цвет аннотации', () async {
-      await repo.addAnnotation(ann('col2', ReaderAnnotationType.quote));
+      await repo.addAnnotation(ann('col2', .quote));
       await repo.updateColor('col2', HighlightColor.blue);
       final list = await repo.watchAnnotations('book3').first;
       final updated = list.firstWhere((a) => a.id == 'col2');
@@ -299,11 +316,11 @@ void main() {
         ReaderAnnotation(
           id: 'anc1',
           bookId: 'cascade-book',
-          type: ReaderAnnotationType.quote,
+          type: .quote,
           charStart: 10,
           charEnd: 30,
           text: 'quoted',
-          color: HighlightColor.coral,
+          color: .coral,
           createdAt: DateTime(2026),
         ),
       );

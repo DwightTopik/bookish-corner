@@ -123,7 +123,7 @@ class _BookDetailsCoverState extends State<BookDetailsCover> {
                   width: widget.size,
                   height: widget.size,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    shape: .circle,
                     color: glowColor.withValues(alpha: 0.58),
                   ),
                 ),
@@ -167,13 +167,13 @@ class _CoverImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final path = coverImagePath;
     if (path != null && File(path).existsSync()) {
-      return Image.file(File(path), fit: BoxFit.cover);
+      return Image.file(File(path), fit: .cover);
     }
     final url = coverUrl;
     if (url != null && url.trim().isNotEmpty) {
       return CachedNetworkImage(
         imageUrl: url,
-        fit: BoxFit.cover,
+        fit: .cover,
         errorWidget: (_, _, _) =>
             _Placeholder(color: placeholderColor, iconColor: iconColor),
         placeholder: (_, _) =>

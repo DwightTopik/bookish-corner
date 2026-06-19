@@ -11,7 +11,6 @@ import 'package:bookish_corner/core/di/database_provider.dart';
 import 'package:bookish_corner/core/di/reader_providers.dart';
 import 'package:bookish_corner/core/di/repository_providers.dart';
 import 'package:bookish_corner/features/library/domain/book.dart';
-import 'package:bookish_corner/features/library/domain/book_format.dart';
 import 'package:bookish_corner/features/reader/domain/reader_bookmark.dart';
 import 'package:bookish_corner/features/reader/domain/reader_bookmark_repository.dart';
 import 'package:bookish_corner/features/reader/domain/reader_capabilities.dart';
@@ -33,7 +32,7 @@ final _testBook = Book(
   title: 'D2 Test Book',
   author: 'Test',
   filePath: '/tmp/d2.fb2',
-  format: BookFormat.epub,
+  format: .epub,
   addedAt: .utc(2026),
 );
 
