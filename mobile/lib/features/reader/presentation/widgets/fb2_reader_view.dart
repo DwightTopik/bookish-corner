@@ -243,12 +243,19 @@ _ChapterLayout _layoutChapter(
         ),
     ];
 
+    // Для ParagraphBlock + left-align первая строка сдвигается при рисовании
+    // на paragraphIndent. Сужаем maxWidth, чтобы перенос слов был корректным
+    // и последний слог первой строки не уходил за clip-rect.
+    final double layoutWidth =
+        (block is ParagraphBlock && align == .left)
+            ? contentWidth - AppDimensions.readerParagraphIndent
+            : contentWidth;
     builtPainters.add(
       TextPainter(
         text: TextSpan(children: spans, style: baseStyle),
         textAlign: align,
         textDirection: .ltr,
-      )..layout(maxWidth: contentWidth),
+      )..layout(maxWidth: layoutWidth),
     );
   }
 
